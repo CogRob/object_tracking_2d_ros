@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(object_tracking_2d)
+project(object_tracking_2d_ros)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -94,7 +94,7 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 	INCLUDE_DIRS include
-	LIBRARIES object_tracking_2d
+	LIBRARIES object_tracking_2d_ros
 	CATKIN_DEPENDS
 		cv_bridge
 		std_msgs
@@ -113,7 +113,7 @@ catkin_package(
 
 # Download the external CogRob repository.
 include(ExternalProject)
-ExternalProject_Add(object_tracking_2d_cogrob_EXTERNAL
+ExternalProject_Add(object_tracking_2d_EXTERNAL
     GIT_REPOSITORY https://github.com/CognitiveRobotics/object_tracking_2D.git
     INSTALL_COMMAND ""
     BUILD_COMMAND "make" # I don't know why this works...
@@ -122,23 +122,23 @@ ExternalProject_Add(object_tracking_2d_cogrob_EXTERNAL
 
 
 # Recover project paths for additional settings.
-ExternalProject_Get_Property(object_tracking_2d_cogrob_EXTERNAL
+ExternalProject_Get_Property(object_tracking_2d_EXTERNAL
   SOURCE_DIR BINARY_DIR INSTALL_DIR)
-set(object_tracking_2d_cogrob_INCLUDE_DIRS
+set(object_tracking_2d_INCLUDE_DIRS
   "${SOURCE_DIR}"
 )
-set(object_tracking_2d_cogrob_LIBRARIES
-  "${BINARY_DIR}/libobject_tracking_2d_cogrob.so"
+set(object_tracking_2d_LIBRARIES
+  "${BINARY_DIR}/libobject_tracking_2d.so"
 )
 
 # Tell CMake that the external project generated a library so we
 # can add dependencies here instead of later.
-add_library(object_tracking_2d_cogrob UNKNOWN IMPORTED)
-set_property(TARGET object_tracking_2d_cogrob
+add_library(object_tracking_2d UNKNOWN IMPORTED)
+set_property(TARGET object_tracking_2d
   PROPERTY IMPORTED_LOCATION
-  ${object_tracking_2d_cogrob_LIBRARIES}
+  ${object_tracking_2d_LIBRARIES}
 )
-add_dependencies(object_tracking_2d_cogrob object_tracking_2d_cogrob_EXTERNAL)
+add_dependencies(object_tracking_2d object_tracking_2d_EXTERNAL)
 
 include_directories(
     include/
@@ -149,19 +149,19 @@ include_directories(
     ${apriltags_swatbotics_INCLUDE_DIRS}
 )
 
-add_executable(object_tracking_2d src/object_tracking_2d.cpp)
-target_link_libraries(object_tracking_2d ${catkin_LIBRARIES})
-target_link_libraries(object_tracking_2d ${Eigen_LIBRARIES})
-target_link_libraries(object_tracking_2d ${OpenCV_LIBRARIES})
-target_link_libraries(object_tracking_2d ${Yaml_LIBRARIES})
-target_link_libraries(object_tracking_2d object_tracking_2d_cogrob)
-add_dependencies(object_tracking_2d ${PROJECT_NAME}_gencpp)
+add_executable(object_tracking_2d_ros src/object_tracking_2d_ros.cpp)
+target_link_libraries(object_tracking_2d_ros ${catkin_LIBRARIES})
+target_link_libraries(object_tracking_2d_ros ${Eigen_LIBRARIES})
+target_link_libraries(object_tracking_2d_ros ${OpenCV_LIBRARIES})
+target_link_libraries(object_tracking_2d_ros ${Yaml_LIBRARIES})
+target_link_libraries(object_tracking_2d_ros object_tracking_2d)
+add_dependencies(object_tracking_2d_ros ${PROJECT_NAME}_gencpp)
 
-install(TARGETS object_tracking_2d
+install(TARGETS object_tracking_2d_ros
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION} 
 )
 
-install(FILES ${object_tracking_2d_LIBRARIES}
+install(FILES ${object_tracking_2d_ros_LIBRARIES}
   DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 

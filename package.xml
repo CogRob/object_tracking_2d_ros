@@ -1,18 +1,19 @@
 <?xml version="1.0"?>
 <package>
-  <name>object_tracking_2d</name>
+  <name>object_tracking_2d_ros</name>
   <version>0.0.0</version>
   <description>
-    ROS wrapper for object_tracking_2d ROS wrapper for the Cognitive Robotics Lab's C++ object_tracking_2d library.  object_tracking_2d was originally developed by Changhyun Choi within Cognitive Robotics Lab at the Georgia Tech.
+    ROS wrapper for the Cognitive Robotics Lab's C++ object_tracking_2d_ros.  object_tracking_2d_ros was originally developed by Changhyun Choi within Cognitive Robotics Lab at the Georgia Tech.
   </description>
+  <license>BSD</license>
 
   <maintainer email="roxfoxpox@gmail.com">ruffsl</maintainer>
+  <author     email="roxfoxpox@gmail.com">ruffsl</author>
 
-  <license>Geogia Tech Software License</license>
+  <url type="website">https://github.com/CognitiveRobotics/object_tracking_2d_ros</url>
+  <url type="repository">https://github.com/CognitiveRobotics/object_tracking_2d_ros</url>
+  <url type="bugtracker">https://github.com/CognitiveRobotics/object_tracking_2d_ros/issues</url>
 
-  <url type="website">https://github.com/CognitiveRobotics/object_tracking_2d</url>
-
-  <author email="roxfoxpox@gmail.com">Ruffin White</author>
 
 
   <!-- The *_depend tags are used to specify dependencies -->

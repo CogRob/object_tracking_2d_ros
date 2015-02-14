@@ -35,7 +35,7 @@ bool running_;
 bool has_camera_info_;
 std::string display_type_;
 
-Eigen::Matrix4d GetDetectionTransform(TagDetection detection);
+Eigen::Matrix4d GetDetectionTransform();
 void InfoCallback(const sensor_msgs::CameraInfoConstPtr& camera_info);
 void InfoCallback(const sensor_msgs::CameraInfoConstPtr& camera_info);
 void ConnectCallback(const ros::SingleSubscriberPublisher& info);

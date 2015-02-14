@@ -146,7 +146,7 @@ include_directories(
     ${Eigen_INCLUDE_DIRS}
     ${OpenCV_INCLUDE_DIRS}
     ${Yaml_INCLUDE_DIRS}
-    ${apriltags_swatbotics_INCLUDE_DIRS}
+    ${object_tracking_2d_INCLUDE_DIRS}
 )
 
 add_executable(object_tracking_2d_ros src/object_tracking_2d_ros.cpp)
@@ -161,7 +161,7 @@ install(TARGETS object_tracking_2d_ros
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION} 
 )
 
-install(FILES ${object_tracking_2d_ros_LIBRARIES}
+install(FILES ${object_tracking_2d_LIBRARIES}
   DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 

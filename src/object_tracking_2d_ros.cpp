@@ -8,8 +8,8 @@
 #include <opencv/highgui.h>
 #include <cv_bridge/cv_bridge.h>
 
-//#include <include/object_tracking_2D/tracker_base.h>
-//#include <include/object_tracking_2D/tracker_irls.h>
+#include <include/object_tracking_2D/tracker_base.h>
+#include <include/object_tracking_2D/tracker_irls.h>
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>

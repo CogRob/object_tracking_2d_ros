@@ -127,6 +127,10 @@ ExternalProject_Get_Property(object_tracking_2d_EXTERNAL
 set(object_tracking_2d_INCLUDE_DIRS
   "${SOURCE_DIR}"
 )
+set(3rdparty_INCLUDE_DIRS
+  "${object_tracking_2d_INCLUDE_DIRS}/3rdparty"
+)
+
 set(object_tracking_2d_LIBRARIES
   "${BINARY_DIR}/libobject_tracking_2d.so"
 )
@@ -147,6 +151,7 @@ include_directories(
     ${OpenCV_INCLUDE_DIRS}
     ${Yaml_INCLUDE_DIRS}
     ${object_tracking_2d_INCLUDE_DIRS}
+    ${3rdparty_INCLUDE_DIRS}
 )
 
 add_executable(object_tracking_2d_ros src/object_tracking_2d_ros.cpp)

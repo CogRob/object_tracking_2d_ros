@@ -1,34 +1,3 @@
-/***********************************************************************
-
-Copyright (c) 2014, Georgia Tech Research Corporation
-Atlanta, Georgia 30332-0415
-All Rights Reserved
-
-Redistribution and use in source and binary forms, with or without modification, 
-are permitted provided that the following conditions are met:
-
-    * Redistributions of source code must retain the above copyright notice, 
-      this list of conditions and the following disclaimer.
-
-    * Redistributions in binary form must reproduce the above copyright notice, 
-      this list of conditions and the following disclaimer in the documentation 
-      and/or other materials provided with the distribution.
-
-    * Neither the name of the copyright holders nor the names of its contributors 
-      may be used to endorse or promote products derived from this software without 
-      specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
-EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
-OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
-SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED 
-TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
-BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY 
-WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-*************************************************************************/
 #include <ros/ros.h>
 #include <ros/forwards.h>
 #include <ros/single_subscriber_publisher.h>
@@ -228,7 +197,7 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
         apriltag_detections.detections.push_back(apriltag_det);
     }
     marker_publisher_.publish(marker_transforms);
-    apriltag_publisher_.publish(apriltag_detections);
+    ebt_publisher_.publish(apriltag_detections);
     
     if(viewer_)
     {
@@ -240,7 +209,7 @@ void ConnectCallback(const ros::SingleSubscriberPublisher& info)
 {
     // Check for subscribers.
     uint32_t subscribers = marker_publisher_.getNumSubscribers()
-                           + apriltag_publisher_.getNumSubscribers();
+                           + ebt_publisher_.getNumSubscribers();
     ROS_DEBUG("Subscription detected! (%d subscribers)", subscribers);
 
     if(subscribers && !running_)
@@ -268,7 +237,7 @@ void DisconnectCallback(const ros::SingleSubscriberPublisher& info)
 {
     // Check for subscribers.
     uint32_t subscribers = marker_publisher_.getNumSubscribers()
-                           + apriltag_publisher_.getNumSubscribers();
+                           + ebt_publisher_.getNumSubscribers();
     ROS_DEBUG("Unsubscription detected! (%d subscribers)", subscribers);
     
     if(!subscribers && running_)
@@ -283,7 +252,28 @@ void DisconnectCallback(const ros::SingleSubscriberPublisher& info)
 void GetParameterValues()
 {
     // Load node-wide configuration values.
-    node_->param("viewer", viewer_, 0);
+    node_->param ("ebt_tracker_type", ebt_tracker_type_, std::string("irls"));
+    node_->param ("ebt_num_particle", ebt_num_particle_, 1);
+    node_->param ("ebt_min_keypoint", ebt_min_keypoint_, 20);
+    node_->param ("ebt_th_cm", ebt_th_cm_, 0.2);
+    node_->param ("ebt_obj_name", ebt_obj_name_, std::string("obj_name"));
+    node_->param ("ebt_mesh_resource", ebt_mesh_resource_, std::string(""));
+    node_->param ("ebt_init_pose", ebt_init_pose_, std::string("1,0,0,0,0,1,0,0,0,0,1,0.5.0,0,0,0,1"));
+    node_->param ("ebt_dull_edge", ebt_dull_edge_, false);
+    // node_->param ("ebt_input", ebt_input_, std::string("normal"));
+    // node_->param ("ebt_width", ebt_width_, 640);
+    // node_->param ("ebt_height", ebt_height_, 480);
+    node_->param ("ebt_sample_step", ebt_sample_step_, 0.005);
+    // node_->param ("ebt_intrinsic", ebt_intrinsic_, std::string("Intrinsics_normal.xml"));
+    // node_->param ("ebt_distortion", ebt_distortion_, std::string("Distortion_normal.xml"));
+    node_->param ("ebt_display", ebt_display_, true);
+    node_->param ("ebt_th_canny_l", ebt_th_canny_l_, 100);
+    node_->param ("ebt_th_canny_h", ebt_th_canny_h_, 120);
+
+
+
+
+    node_->param("viewer", viewer_, true);
     node_->param("tag_family", tag_family_name_, DEFAULT_TAG_FAMILY);
     node_->param("default_tag_size", default_tag_size_, DEFAULT_TAG_SIZE);
     node_->param("display_type", display_type_, DEFAULT_DISPLAY_TYPE);
@@ -320,20 +310,19 @@ void SetupPublisher()
     marker_publisher_ = node_->advertise<visualization_msgs::MarkerArray>(
             DEFAULT_MARKER_TOPIC, 1, connect_callback,
             disconnect_callback);
-    apriltag_publisher_ = node_->advertise<apriltags::AprilTagDetections>(
+    ebt_publisher_ = node_->advertise<apriltags::AprilTagDetections>(
             DEFAULT_DETECTIONS_TOPIC, 1, connect_callback, disconnect_callback);
 }
 
-void InitializeTags()
+void InitializeObjects()
 {
-    tag_params.newQuadAlgorithm = 1;
-    family_ = new TagFamily(tag_family_name_);
-    detector_ = new TagDetector(*family_, tag_params);
+    //TODO: Add in tracker
+    tracker_ = new ObjectTracker(@@@@@@@@@);
 }
 
 void InitializeROSNode(int argc, char **argv)
 {
-    ros::init(argc, argv, "apriltags");
+    ros::init(argc, argv, "object_tracking_2d_ros");
     node_ =  boost::make_shared<ros::NodeHandle>("~");
     image_ = boost::make_shared<image_transport::ImageTransport>(*node_);
 }
@@ -343,23 +332,22 @@ int main(int argc, char **argv)
     InitializeROSNode(argc,argv);
     GetParameterValues();
     SetupPublisher();
-    InitializeTags();
+    InitializeObjects();
 
     if(viewer_){
-        cvNamedWindow("AprilTags");
+        cvNamedWindow("ObjectTrackin2D");
         cvStartWindowThread();
     }
 
-    ROS_INFO("AprilTags node started.");
+    ROS_INFO("ObjectTrackin2D node started.");
     running_ = false;
     has_camera_info_ = false;
     ros::spin();
-    ROS_INFO("AprilTags node stopped.");
+    ROS_INFO("ObjectTrackin2D node stopped.");
 
     //Destroying Stuff
-    cvDestroyWindow("AprilTags");
-    delete detector_;
-    delete family_;
+    cvDestroyWindow("ObjectTrackin2D");
+    delete tracker_;
 
     return EXIT_SUCCESS;
 }

@@ -101,6 +101,14 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
     cv::Mat tmp;
     cv::Point2d opticalCenter(0.5*subscribed_gray.rows,
                               0.5*subscribed_gray.cols);
+
+    tracker_->setImage(subscribed_gray);
+    tracker_->tracking();
+
+    CvScalar color = cvScalar(255,255,0);
+    tracker_->obj_model_->displayPoseLine(tracker_->img_result_, tracker_->obj_model_->pose_, color, 1, false);
+    tracker_->obj_model_->displaySamplePointsAndErrors(tracker_->img_edge_);
+
 //    TagDetectionArray detections;
 //    detector_->process(subscribed_gray, opticalCenter, detections);
 //    visualization_msgs::MarkerArray marker_transforms;
@@ -186,7 +194,9 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
     
     if(viewer_)
     {
-        cv::imshow("ObjectTrackin2D", subscribed_gray);
+        cv::Mat my_image = tracker_->img_result_;
+        cv::imshow("ObjectTrackin2D", my_image);
+//        cv::imshow("ObjectTrackin2D", subscribed_gray);
     }
 }
 

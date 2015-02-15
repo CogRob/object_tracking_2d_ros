@@ -28,46 +28,9 @@ using namespace std;
 
 // Functions
 
-Eigen::Matrix4d GetDetectionTransform()
+Eigen::Matrix4d GetDetectionTransform(ObjectDetection detection)
 {
-//    double tag_size = 0;
-
-//    std::vector<cv::Point3f> object_pts;
-//    std::vector<cv::Point2f> image_pts;
-//    double tag_radius = tag_size/2.;
-    
-//    object_pts.push_back(cv::Point3f(-tag_radius, -tag_radius, 0));
-//    object_pts.push_back(cv::Point3f( tag_radius, -tag_radius, 0));
-//    object_pts.push_back(cv::Point3f( tag_radius,  tag_radius, 0));
-//    object_pts.push_back(cv::Point3f(-tag_radius,  tag_radius, 0));
-    
-//    image_pts.push_back(detection.p[0]);
-//    image_pts.push_back(detection.p[1]);
-//    image_pts.push_back(detection.p[2]);
-//    image_pts.push_back(detection.p[3]);
-
-//    cv::Matx33f intrinsics(camera_info_.K[0], 0, camera_info_.K[2],
-//                           0, camera_info_.K[4], camera_info_.K[5],
-//                           0, 0, 1);
-    
-//    cv::Mat rvec, tvec;
-//    cv::Vec4f dist_param(0,0,0,0);
-//    cv::solvePnP(object_pts, image_pts, intrinsics, dist_param,
-//            rvec, tvec);
-//    cv::Matx33d r;
-//    cv::Rodrigues(rvec, r);
-//    Eigen::Matrix3d rot;
-//    rot << r(0,0), r(0,1), r(0,2),
-//           r(1,0), r(1,1), r(1,2),
-//           r(2,0), r(2,1), r(2,2);
-    
-//    Eigen::Matrix4d T;
-//    T.topLeftCorner(3,3) = rot;
-//    T.col(3).head(3) <<
-//            tvec.at<double>(0), tvec.at<double>(1), tvec.at<double>(2);
-//    T.row(3) << 0,0,0,1;
-    
-//    return T;
+    return detection.pose;
 }
 
 // Callback for camera info
@@ -101,96 +64,88 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
     cv::Mat tmp;
     cv::Point2d opticalCenter(0.5*subscribed_gray.rows,
                               0.5*subscribed_gray.cols);
+    ObjectDetectionArray detections;
 
     tracker_->setImage(subscribed_gray);
     tracker_->tracking();
+    ObjectDetection d;
 
-    CvScalar color = cvScalar(255,255,0);
-    tracker_->obj_model_->displayPoseLine(tracker_->img_result_, tracker_->obj_model_->pose_, color, 1, false);
-    tracker_->obj_model_->displaySamplePointsAndErrors(tracker_->img_edge_);
+    pose_cv_ = tracker_->obj_model_->pose_;
+    for(int r = 0; r < 4; r++){
+        for(int c = 0; c < 4; c++){
+            pose_(r,c) = CV_MAT_ELEM(*pose_cv_, float, r, c);
+        }
+    }
+    d.pose = pose_;
+    d.good = true;
+    d.id = 1;
+    detections.push_back(d);
 
-//    TagDetectionArray detections;
-//    detector_->process(subscribed_gray, opticalCenter, detections);
-//    visualization_msgs::MarkerArray marker_transforms;
-//    object_tracking_2d_ros::ObjectDetections object_detections;
-//    object_detections.header.frame_id = msg->header.frame_id;
-//    object_detections.header.stamp = msg->header.stamp;
-    
-//    if(viewer_)
-//    {
-//        subscribed_gray = family_->superimposeDetections(subscribed_gray,
-//                                                         detections);
-//    }
-//    for(unsigned int i = 0; i < detections.size(); ++i)
-//    {
-//        // skip bad detections
-//        if(!detections[i].good)
-//        {
-//            continue;
-//        }
+    visualization_msgs::MarkerArray marker_transforms;
+    object_tracking_2d_ros::ObjectDetections object_detections;
+    object_detections.header.frame_id = msg->header.frame_id;
+    object_detections.header.stamp = msg->header.stamp;
+
+    if(viewer_)
+    {
+        CvScalar color = cvScalar(255,255,0);
+        tracker_->obj_model_->displayPoseLine(tracker_->img_result_, pose_cv_, color, 1, false);
+        tracker_->obj_model_->displaySamplePointsAndErrors(tracker_->img_edge_);
+    }
+
+    for(unsigned int i = 0; i < detections.size(); ++i)
+    {
+        // skip bad detections
+        if(!detections[i].good)
+        {
+            continue;
+        }
         
-//        Eigen::Matrix4d pose = GetDetectionTransform(detections[i]);
+        Eigen::Matrix4d pose = GetDetectionTransform(detections[i]);
         
-//        // Get this info from earlier code, don't extract it again
-//        Eigen::Matrix3d R = pose.block<3,3>(0,0);
-//        Eigen::Quaternion<double> q(R);
+        // Get this info from earlier code, don't extract it again
+        Eigen::Matrix3d R = pose.block<3,3>(0,0);
+        Eigen::Quaternion<double> q(R);
         
-//        double tag_size = 0;
-//        cout << tag_size << " " << detections[i].id << endl;
+        visualization_msgs::Marker marker_transform;
+        marker_transform.header.frame_id = msg->header.frame_id;
+        marker_transform.header.stamp = msg->header.stamp;
+        stringstream convert;
+        convert << "tag" << detections[i].id;
+        marker_transform.ns = convert.str().c_str();
+        marker_transform.id = detections[i].id;
+
+        marker_transform.type = visualization_msgs::Marker::MESH_RESOURCE;
+        marker_transform.mesh_resource = ebt_mesh_path_;
+        marker_transform.scale.x = 1;
+        marker_transform.scale.y = 1;
+        marker_transform.scale.z = 1;
+
+        marker_transform.action = visualization_msgs::Marker::ADD;
+        marker_transform.pose.position.x = pose(0,3);
+        marker_transform.pose.position.y = pose(1,3);
+        marker_transform.pose.position.z = pose(2,3);
+        marker_transform.pose.orientation.x = q.x();
+        marker_transform.pose.orientation.y = q.y();
+        marker_transform.pose.orientation.z = q.z();
+        marker_transform.pose.orientation.w = q.w();
         
-//        visualization_msgs::Marker marker_transform;
-//        marker_transform.header.frame_id = msg->header.frame_id;
-//        marker_transform.header.stamp = msg->header.stamp;
-//        stringstream convert;
-//        convert << "tag" << detections[i].id;
-//        marker_transform.ns = convert.str().c_str();
-//        marker_transform.id = detections[i].id;
-//        if(display_type_ == "ARROW"){
-//            marker_transform.type = visualization_msgs::Marker::ARROW;
-//            marker_transform.scale.x = tag_size;
-//            marker_transform.scale.y = tag_size*10;
-//            marker_transform.scale.z = tag_size*0.5;
-//        }
-//        else if(display_type_ == "CUBE"){
-//            marker_transform.type = visualization_msgs::Marker::CUBE;
-//            marker_transform.scale.x = tag_size;
-//            marker_transform.scale.y = tag_size;
-//            marker_transform.scale.z = 0.01 * tag_size;
-//        }
-//        marker_transform.action = visualization_msgs::Marker::ADD;
-//        marker_transform.pose.position.x = pose(0,3);
-//        marker_transform.pose.position.y = pose(1,3);
-//        marker_transform.pose.position.z = pose(2,3);
-//        marker_transform.pose.orientation.x = q.x();
-//        marker_transform.pose.orientation.y = q.y();
-//        marker_transform.pose.orientation.z = q.z();
-//        marker_transform.pose.orientation.w = q.w();
+        marker_transform.color.r = 0.0;
+        marker_transform.color.g = 1.0;
+        marker_transform.color.b = 0.0;
+        marker_transform.color.a = 1.0;
+        marker_transforms.markers.push_back(marker_transform);
         
-//        marker_transform.color.r = 1.0;
-//        marker_transform.color.g = 0.0;
-//        marker_transform.color.b = 1.0;
-//        marker_transform.color.a = 1.0;
-//        marker_transforms.markers.push_back(marker_transform);
-        
-//        // Fill in AprilTag detection.
-//        apriltags::AprilTagDetection apriltag_det;
-//        apriltag_det.header = marker_transform.header;
-//        apriltag_det.id = marker_transform.id;
-//        apriltag_det.tag_size = tag_size;
-//        apriltag_det.pose = marker_transform.pose;
-//        const TagDetection &det = detections[i];
-//        for(uint pt_i = 0; pt_i < 4; ++pt_i)
-//        {
-//            geometry_msgs::Point32 img_pt;
-//            img_pt.x = det.p[pt_i].x;
-//            img_pt.y = det.p[pt_i].y;
-//            img_pt.z = 1;
-//            apriltag_det.corners2d[pt_i] = img_pt;
-//        }
-//        apriltag_detections.detections.push_back(apriltag_det);
-//    }
-//    marker_publisher_.publish(marker_transforms);
-//    ebt_publisher_.publish(object_detections);
+        // Fill in Object detection.
+        object_tracking_2d_ros::ObjectDetection object_det;
+        object_det.header = marker_transform.header;
+        object_det.id = marker_transform.id;
+        object_det.pose = marker_transform.pose;
+
+        object_detections.detections.push_back(object_det);
+    }
+    marker_publisher_.publish(marker_transforms);
+    ebt_publisher_.publish(object_detections);
     
     if(viewer_)
     {
@@ -251,12 +206,11 @@ void GetParameterValues()
     node_->param ("ebt_num_particle", ebt_num_particle_, 1);
     node_->param ("ebt_min_keypoint", ebt_min_keypoint_, 20);
     node_->param ("ebt_th_cm", ebt_th_cm_, 0.2);
-    node_->param ("ebt_obj_name", ebt_obj_name_, std::string("obj_name"));
+    node_->param ("ebt_obj_path", ebt_obj_path_, std::string("obj_name"));
+    node_->param ("ebt_mesh_path", ebt_mesh_path_, std::string("mesh_path"));
     node_->param ("ebt_mesh_resource", ebt_mesh_resource_, std::string(""));
-    //    node_->param ("ebt_init_pose", ebt_init_pose_, std::string("1,0,0,0,0,1,0,0,0,0,1,0.5,0,0,0,0,1"));
     node_->getParam("ebt_init_pose", ebt_init_pose_);
     node_->param ("ebt_dull_edge", ebt_dull_edge_, false);
-    // node_->param ("ebt_input", ebt_input_, std::string("normal"));
     node_->param ("ebt_width", ebt_width_, 640);
     node_->param ("ebt_height", ebt_height_, 480);
     node_->param ("ebt_sample_step", ebt_sample_step_, 0.005);
@@ -318,7 +272,7 @@ void InitializeTracker()
     for (int i = 0; i < 16; i++)
         pose_init_->data.fl[i] = ebt_init_pose_[i];
 
-    tracker_->initTracker(ebt_obj_name_, input, ebt_intrinsic_, ebt_distortion_, ebt_width_, ebt_height_, pose_init_ , ach_channel);
+    tracker_->initTracker(ebt_obj_path_, input, ebt_intrinsic_, ebt_distortion_, ebt_width_, ebt_height_, pose_init_ , ach_channel);
 }
 
 void InitializeROSNode(int argc, char **argv)

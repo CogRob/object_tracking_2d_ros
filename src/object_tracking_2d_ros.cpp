@@ -243,18 +243,18 @@ void GetParameterValues()
     node_->param ("ebt_th_cm", ebt_th_cm_, 0.2);
     node_->param ("ebt_obj_name", ebt_obj_name_, std::string("obj_name"));
     node_->param ("ebt_mesh_resource", ebt_mesh_resource_, std::string(""));
-//    node_->param ("ebt_init_pose", ebt_init_pose_, std::string("1,0,0,0,0,1,0,0,0,0,1,0.5,0,0,0,0,1"));
+    //    node_->param ("ebt_init_pose", ebt_init_pose_, std::string("1,0,0,0,0,1,0,0,0,0,1,0.5,0,0,0,0,1"));
     node_->getParam("ebt_init_pose", ebt_init_pose_);
     node_->param ("ebt_dull_edge", ebt_dull_edge_, false);
     // node_->param ("ebt_input", ebt_input_, std::string("normal"));
-     node_->param ("ebt_width", ebt_width_, 640);
-     node_->param ("ebt_height", ebt_height_, 480);
+    node_->param ("ebt_width", ebt_width_, 640);
+    node_->param ("ebt_height", ebt_height_, 480);
     node_->param ("ebt_sample_step", ebt_sample_step_, 0.005);
-     node_->param ("ebt_intrinsic", ebt_intrinsic_, std::string("Intrinsics_normal.xml"));
-     node_->param ("ebt_distortion", ebt_distortion_, std::string("Distortion_normal.xml"));
-    node_->param ("ebt_display", ebt_display_, true);
+    node_->param ("ebt_intrinsic", ebt_intrinsic_, std::string("Intrinsics_normal.xml"));
+    node_->param ("ebt_distortion", ebt_distortion_, std::string("Distortion_normal.xml"));
     node_->param ("ebt_th_canny_l", ebt_th_canny_l_, 100);
     node_->param ("ebt_th_canny_h", ebt_th_canny_h_, 120);
+    node_->param ("ebt_display", ebt_display_, false);
     node_->param("viewer", viewer_, true);
 }
 
@@ -338,7 +338,7 @@ int main(int argc, char **argv)
 
     //Destroying Stuff
     cvDestroyWindow("ObjectTrackin2D");
-//    delete tracker_;
+    delete tracker_;
 
     return EXIT_SUCCESS;
 }

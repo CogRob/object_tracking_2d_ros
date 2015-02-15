@@ -83,27 +83,27 @@ void InfoCallback(const sensor_msgs::CameraInfoConstPtr& camera_info)
 // Callback for image data
 void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
-//    if(!has_camera_info_){
-//        ROS_WARN("No Camera Info Received Yet");
-//        return;
-//    }
+    if(!has_camera_info_){
+        ROS_WARN("No Camera Info Received Yet");
+        return;
+    }
 
-//    // Get the image
-//    cv_bridge::CvImagePtr subscribed_ptr;
-//    try
-//    {
-//        subscribed_ptr = cv_bridge::toCvCopy(msg, "mono8");
-//    }
-//    catch(cv_bridge::Exception& e)
-//    {
-//        ROS_ERROR("cv_bridge exception: %s", e.what());
-//        return;
-//    }
+    // Get the image
+    cv_bridge::CvImagePtr subscribed_ptr;
+    try
+    {
+        subscribed_ptr = cv_bridge::toCvCopy(msg, "bgr8");
+    }
+    catch(cv_bridge::Exception& e)
+    {
+        ROS_ERROR("cv_bridge exception: %s", e.what());
+        return;
+    }
     
-//    cv::Mat subscribed_gray = subscribed_ptr->image;
-//    cv::Mat tmp;
-//    cv::Point2d opticalCenter(0.5*subscribed_gray.rows,
-//                              0.5*subscribed_gray.cols);
+    cv::Mat subscribed_gray = subscribed_ptr->image;
+    cv::Mat tmp;
+    cv::Point2d opticalCenter(0.5*subscribed_gray.rows,
+                              0.5*subscribed_gray.cols);
 //    TagDetectionArray detections;
 //    detector_->process(subscribed_gray, opticalCenter, detections);
 //    visualization_msgs::MarkerArray marker_transforms;
@@ -187,10 +187,10 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
 //    marker_publisher_.publish(marker_transforms);
 //    ebt_publisher_.publish(object_detections);
     
-//    if(viewer_)
-//    {
-//        cv::imshow("AprilTags", subscribed_gray);
-//    }
+    if(viewer_)
+    {
+        cv::imshow("ObjectTrackin2D", subscribed_gray);
+    }
 }
 
 void ConnectCallback(const ros::SingleSubscriberPublisher& info)

@@ -8,9 +8,6 @@
 #include <opencv/highgui.h>
 #include <cv_bridge/cv_bridge.h>
 
-#include <include/object_tracking_2D/tracker_base.h>
-#include <include/object_tracking_2D/tracker_irls.h>
-
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
@@ -246,14 +243,15 @@ void GetParameterValues()
     node_->param ("ebt_th_cm", ebt_th_cm_, 0.2);
     node_->param ("ebt_obj_name", ebt_obj_name_, std::string("obj_name"));
     node_->param ("ebt_mesh_resource", ebt_mesh_resource_, std::string(""));
-    node_->param ("ebt_init_pose", ebt_init_pose_, std::string("1,0,0,0,0,1,0,0,0,0,1,0.5.0,0,0,0,1"));
+//    node_->param ("ebt_init_pose", ebt_init_pose_, std::string("1,0,0,0,0,1,0,0,0,0,1,0.5,0,0,0,0,1"));
+    node_->getParam("ebt_init_pose", ebt_init_pose_);
     node_->param ("ebt_dull_edge", ebt_dull_edge_, false);
     // node_->param ("ebt_input", ebt_input_, std::string("normal"));
-    // node_->param ("ebt_width", ebt_width_, 640);
-    // node_->param ("ebt_height", ebt_height_, 480);
+     node_->param ("ebt_width", ebt_width_, 640);
+     node_->param ("ebt_height", ebt_height_, 480);
     node_->param ("ebt_sample_step", ebt_sample_step_, 0.005);
-    // node_->param ("ebt_intrinsic", ebt_intrinsic_, std::string("Intrinsics_normal.xml"));
-    // node_->param ("ebt_distortion", ebt_distortion_, std::string("Distortion_normal.xml"));
+     node_->param ("ebt_intrinsic", ebt_intrinsic_, std::string("Intrinsics_normal.xml"));
+     node_->param ("ebt_distortion", ebt_distortion_, std::string("Distortion_normal.xml"));
     node_->param ("ebt_display", ebt_display_, true);
     node_->param ("ebt_th_canny_l", ebt_th_canny_l_, 100);
     node_->param ("ebt_th_canny_h", ebt_th_canny_h_, 120);
@@ -273,10 +271,44 @@ void SetupPublisher()
             DEFAULT_DETECTIONS_TOPIC, 1, connect_callback, disconnect_callback);
 }
 
-void InitializeObjects()
+void InitializeTracker()
 {
-    //TODO: Add in tracker
-//    tracker_ = new ObjectTracker(@@@@@@@@@);
+    if(ebt_tracker_type_.compare("irls") == 0)
+    {
+        tracker_ = new IrlsTracker ();
+        tracker_->setMinKeypointMatches(ebt_min_keypoint_);
+    }
+    else if(ebt_tracker_type_.compare("pf") == 0)
+    {
+        tracker_ = new TextureParticleFilterTracker ();
+        ((TextureParticleFilterTracker*)tracker_)->setNumParticle(ebt_num_particle_);
+        ((TextureParticleFilterTracker*)tracker_)->initParticleFilter();
+    }
+    else if(ebt_tracker_type_.compare("pf_textureless") == 0)
+    {
+        tracker_ = new TexturelessParticleFilterTracker ();
+        ((TexturelessParticleFilterTracker*)tracker_)->setNumParticle(ebt_num_particle_);
+        ((TexturelessParticleFilterTracker*)tracker_)->setThresholdCM(ebt_th_cm_);
+        ((TexturelessParticleFilterTracker*)tracker_)->initParticleFilter();
+    }
+    else
+    {
+        ROS_ERROR_STREAM("Unknown tracker method name: " << ebt_tracker_type_);
+    }
+
+    tracker_->setSampleStep(ebt_sample_step_);
+    tracker_->setDisplay(ebt_display_);
+    tracker_->setNetworkMode(false);
+    tracker_->setConsideringDullEdges(ebt_dull_edge_);
+    tracker_->setTracking(true);
+    std::string input = "normal";
+    std::string ach_channel = "normal";
+
+    // oeverwrite pose_init
+    for (int i = 0; i < 16; i++)
+        pose_init_->data.fl[i] = ebt_init_pose_[i];
+
+    tracker_->initTracker(ebt_obj_name_, input, ebt_intrinsic_, ebt_distortion_, ebt_width_, ebt_height_, pose_init_ , ach_channel);
 }
 
 void InitializeROSNode(int argc, char **argv)
@@ -291,7 +323,7 @@ int main(int argc, char **argv)
     InitializeROSNode(argc,argv);
     GetParameterValues();
     SetupPublisher();
-    InitializeObjects();
+    InitializeTracker();
 
     if(viewer_){
         cvNamedWindow("ObjectTrackin2D");

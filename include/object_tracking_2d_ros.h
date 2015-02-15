@@ -1,3 +1,7 @@
+#include "include/object_tracking_2D/tracker_irls.h"
+#include "include/object_tracking_2D/tracker_pf_texture.h"
+#include "include/object_tracking_2D/tracker_pf_textureless.h"
+
 const std::string DEFAULT_IMAGE_TOPIC = "image";
 const std::string DEFAULT_CAMERA_INFO_TOPIC = "camera_info";
 const std::string DEFAULT_MARKER_TOPIC = "marker_array";
@@ -20,14 +24,21 @@ int ebt_num_particle_;
 int ebt_min_keypoint_;
 double ebt_th_cm_;
 std::string ebt_obj_name_;
-std::string ebt_init_pose_;
+//std::string ebt_init_pose_;
+std::vector<float> ebt_init_pose_;
 bool ebt_dull_edge_;
+int ebt_width_;
+int ebt_height_;
 double ebt_sample_step_;
-// std::string ebt_intrinsic_;
-// std::string ebt_distortion_;
+std::string ebt_intrinsic_;
+std::string ebt_distortion_;
 bool ebt_display_;
 int ebt_th_canny_l_;
 int ebt_th_canny_h_;
+
+CvMat* pose_init_ = cvCreateMat(4, 4, CV_32F);
+
+TrackerBase* tracker_;
 
 // Settings and local information
 bool viewer_;
@@ -43,5 +54,5 @@ void DisconnectCallback(const ros::SingleSubscriberPublisher& info);
 void DisconnectHandler();
 void GetParameterValues();
 void SetupPublisher();
-void InitializeTags();
+void InitializeTracker();
 void InitializeROSNode();

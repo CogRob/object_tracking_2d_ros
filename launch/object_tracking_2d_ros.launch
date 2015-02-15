@@ -22,7 +22,8 @@
 			<param name="ebt_min_keypoint"    value="20"/> <!-- min number of keypoint matches to start tracking -->
 			<param name="ebt_th_cm"           value="0.2"/> <!-- threshold of chamfer matching -->
 		<param name="ebt_obj_name"        value="obj_name"/> <!-- name of traget object -->
-			<param name="ebt_init_pose"       value="1,0,0,0,0,1,0,0,0,0,1,0.5.0,0,0,0,1"/> <!-- initial pose of object -->
+			<!-- <param name="ebt_init_pose"       value="1,0,0,0,0,1,0,0,0,0,1,0.5.0,0,0,0,1"/> --> <!-- initial pose of object -->
+			<rosparam param = "ebt_init_pose">[1,0,0,0,0,1,0,0,0,0,1,0.5,0,0,0,1]</rosparam>
 			<param name="ebt_dull_edge"       value="false"/> <!-- consider dull edges -->
 			<param name="ebt_sample_step"     value="0.005f"/> <!-- sample step -->
 			<!-- <param name="ebt_intrinsic"     value="Intrinsics_normal.xml"/> --> <!-- intrinsic parameters -->

@@ -43,10 +43,10 @@ void InfoCallback(const sensor_msgs::CameraInfoConstPtr& camera_info)
 // Callback for image data
 void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
-    if(!has_camera_info_){
-        ROS_WARN("No Camera Info Received Yet");
-        return;
-    }
+//    if(!has_camera_info_){
+//        ROS_WARN("No Camera Info Received Yet");
+//        return;
+//    }
 
     // Get the image
     cv_bridge::CvImagePtr subscribed_ptr;
@@ -149,7 +149,7 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
     
     if(viewer_)
     {
-        cv::Mat my_image = tracker_->img_result_;
+        cv::Mat my_image = tracker_->img_edge_;
         cv::imshow("ObjectTrackin2D", my_image);
 //        cv::imshow("ObjectTrackin2D", subscribed_gray);
     }
@@ -265,8 +265,8 @@ void InitializeTracker()
     tracker_->setNetworkMode(false);
     tracker_->setConsideringDullEdges(ebt_dull_edge_);
     tracker_->setTracking(true);
-    std::string input = "normal";
-    std::string ach_channel = "normal";
+    std::string input = "ach";
+    std::string ach_channel = "none";
 
     // oeverwrite pose_init
     for (int i = 0; i < 16; i++)

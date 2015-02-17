@@ -11,13 +11,19 @@
 		<remap from="~detections" to="/apriltags/detections"/>
 	</node> -->
 	
-	<include file="$(find openni_launch)/launch/openni.launch">
-		<arg name="load_driver" value="true" />
-	</include>
+	<node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
+		<param name="video_device" value="/dev/video0" />
+		<param name="image_width" value="640" />
+		<param name="image_height" value="480" />
+		<param name="pixel_format" value="mjpeg" />
+		<param name="camera_frame_id" value="usb_cam" />
+		<param name="io_method" value="mmap"/>
+	</node>
+	<node pkg="tf" type="static_transform_publisher" name="usb_cam_broadcaster" args="0 0 0 0 0 0 1 base_frame usb_cam 100" />
 
 	<node pkg="object_tracking_2d_ros" type="object_tracking_2d_ros" name="object_tracking_2d_ros">
 		<!-- EBT TRACKER -->
-		<param name="ebt_tracker_type"        value="irls"/> <!-- name tracker (irls, pf, pf_textureless) -->
+		<param name="ebt_tracker_type"        value="pf"/> <!-- name tracker (irls, pf, pf_textureless) -->
 			<param name="ebt_num_particle"    value="50"/> <!-- number of particles -->
 			<param name="ebt_min_keypoint"    value="20"/> <!-- min number of keypoint matches to start tracking -->
 			<param name="ebt_th_cm"           value="0.2"/> <!-- threshold of chamfer matching -->
@@ -31,11 +37,16 @@
 			<param name="ebt_display"     value="false"/> <!-- display results or not -->
 
 		<param name="~viewer"       value="true"/> <!-- display results or not -->
-		<remap from="~image" to="/camera/rgb/image_rect_color"/>
-		<remap from="~camera_info" to="/camera/rgb/camera_info"/>
+		<remap from="~image"        to="/usb_cam/image_raw"/>
+		<remap from="~camera_info"  to="/usb_cam/image_raw/camera_info"/>
 		<remap from="~marker_array" to="/object_tracking_2d_ros/marker_array"/>
 		<remap from="~detections"   to="/object_tracking_2d_ros/detections"/>
 	</node>
+
+<!-- 	<node name="image_view" pkg="image_view" type="image_view" respawn="false" output="screen">
+		<remap from="image" to="/usb_cam/image_raw"/>
+		<param name="autosize" value="true" />
+	</node> -->
 
 	<!-- RVIZ to view the visualization -->
 	<node name="RVIZ" pkg="rviz" type="rviz" args=" -d $(find object_tracking_2d_ros)/rviz/openni.rviz"/>

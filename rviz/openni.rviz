@@ -24,7 +24,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: Image
+    SyncSource: ""
 Visualization Manager:
   Class: ""
   Displays:
@@ -51,15 +51,9 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        camera_depth_frame:
+        base_frame:
           Value: true
-        camera_depth_optical_frame:
-          Value: true
-        camera_link:
-          Value: true
-        camera_rgb_frame:
-          Value: true
-        camera_rgb_optical_frame:
+        usb_cam:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -67,13 +61,9 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        camera_link:
-          camera_depth_frame:
-            camera_depth_optical_frame:
-              {}
-          camera_rgb_frame:
-            camera_rgb_optical_frame:
-              {}
+        base_frame:
+          usb_cam:
+            {}
       Update Interval: 0
       Value: true
     - Class: rviz/MarkerArray
@@ -81,7 +71,7 @@ Visualization Manager:
       Marker Topic: /object_tracking_2d_ros/marker_array
       Name: MarkerArray
       Namespaces:
-        {}
+        tag1: true
       Queue Size: 100
       Value: true
     - Class: rviz/Image
@@ -106,7 +96,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: camera_rgb_optical_frame
+    Fixed Frame: usb_cam
     Frame Rate: 30
   Name: root
   Tools:
@@ -139,10 +129,10 @@ Visualization Manager:
         Z: 0
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.530398
+      Pitch: 0.785398
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.580398
+      Yaw: 0.785398
     Saved: ~
 Window Geometry:
   Displays:

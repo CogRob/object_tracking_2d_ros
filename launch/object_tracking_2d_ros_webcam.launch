@@ -1,6 +1,6 @@
 <launch>
 	<!-- Start an object_tracking_2d_ros node using the default settings
-	to connect to an OpenNI device (e.g. Kinect). -->
+	to connect to an usb webcam device. -->
 <!-- 	<node pkg="apriltags" type="apriltags" name="apriltags">
 		<param name="~default_tag_size" value="0.1524"/>
 		<param name="~viewer" value="1"/>
@@ -23,18 +23,18 @@
 
 	<node pkg="object_tracking_2d_ros" type="object_tracking_2d_ros" name="object_tracking_2d_ros">
 		<!-- EBT TRACKER -->
-		<param name="ebt_tracker_type"        value="pf"/> <!-- name tracker (irls, pf, pf_textureless) -->
-			<param name="ebt_num_particle"    value="50"/> <!-- number of particles -->
+		<param name="ebt_tracker_type"        value="irls"/> <!-- name tracker (irls, pf, pf_textureless) -->
+			<param name="ebt_num_particle"    value="10"/> <!-- number of particles -->
 			<param name="ebt_min_keypoint"    value="20"/> <!-- min number of keypoint matches to start tracking -->
 			<param name="ebt_th_cm"           value="0.2"/> <!-- threshold of chamfer matching -->
-		<param name="ebt_obj_path"        value="/home/tox/git/object_data/Objects/Waterglass_white_800"/> <!-- path of traget object -->
-		<param name="ebt_mesh_path"        value="package://object_tracking_2d_ros/objects/mesh/Waterglass_white_800.dae"/> <!-- path of traget mesh -->
+		<param name="ebt_obj_path"            value="$(find object_tracking_2d_ros)/data/Waterglass_white_800"/> <!-- path of traget object -->
+		<param name="ebt_mesh_path"           value="package://object_tracking_2d_ros/data/Waterglass_white_800/Waterglass_white_800.dae"/> <!-- path of traget mesh -->
 			<rosparam param = "ebt_init_pose">[1,0,0,0,0,1,0,0,0,0,1,0.5,0,0,0,1]</rosparam>
 			<param name="ebt_dull_edge"       value="false"/> <!-- consider dull edges -->
-			<param name="ebt_sample_step"     value="0.005f"/> <!-- sample step -->
-			<param name="ebt_intrinsic"     value="/home/tox/git/object_data/Objects/Intrinsics_normal.xml"/> <!-- intrinsic parameters -->
-			<param name="ebt_distortion"    value="/home/tox/git/object_data/Objects/Distortion_normal.xml"/> <!-- distortion parameters -->
-			<param name="ebt_display"     value="false"/> <!-- display results or not -->
+			<param name="ebt_sample_step"     value="0.0001f"/> <!-- sample step -->
+			<param name="ebt_intrinsic"       value="$(find object_tracking_2d_ros)/data/Intrinsics_normal.xml"/> <!-- intrinsics parameters -->
+			<param name="ebt_distortion"      value="$(find object_tracking_2d_ros)/data/Distortion_normal.xml"/> <!-- distortion parameters -->
+			<param name="ebt_display"         value="false"/> <!-- display results or not -->
 
 		<param name="~viewer"       value="true"/> <!-- display results or not -->
 		<remap from="~image"        to="/usb_cam/image_raw"/>

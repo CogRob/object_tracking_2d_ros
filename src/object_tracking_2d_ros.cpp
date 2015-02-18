@@ -44,10 +44,10 @@ void InfoCallback(const sensor_msgs::CameraInfoConstPtr& camera_info)
 void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
     // Dont atempt to use the image without having info about the camera first
-    if(!has_camera_info_){
-        ROS_WARN("No Camera Info Received Yet");
-        return;
-    }
+//    if(!has_camera_info_){
+//        ROS_WARN("No Camera Info Received Yet");
+//        return;
+//    }
 
     // Get the image
     cv_bridge::CvImagePtr subscribed_ptr;

@@ -37,7 +37,6 @@
   <build_depend>visualization_msgs</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>opencv2</build_depend>
-  <build_depend>yaml-cpp</build_depend>
   <build_depend>eigen</build_depend>
   <build_depend>git</build_depend>
   <build_depend>message_generation</build_depend>
@@ -51,7 +50,6 @@
   <run_depend>visualization_msgs</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>opencv2</run_depend>
-  <run_depend>yaml-cpp</run_depend>
   <run_depend>message_runtime</run_depend>
   <run_depend>geometry_msgs</run_depend>
   <run_depend>message_generation</run_depend>

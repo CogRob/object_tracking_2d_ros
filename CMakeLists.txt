@@ -17,9 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(OpenCV REQUIRED)
 find_package(Eigen REQUIRED)
 
-# Import the yaml-cpp libraries.
 include(FindPkgConfig)
-pkg_check_modules(Yaml REQUIRED yaml-cpp)
 
 
 ## System dependencies are found with CMake's conventions
@@ -57,7 +55,7 @@ pkg_check_modules(Yaml REQUIRED yaml-cpp)
 
 ## Generate messages in the 'msg' folder
 add_message_files(
-	DIRECTORY msg FILES
+    DIRECTORY msg FILES
     ObjectDetection.msg
     ObjectDetections.msg
 )
@@ -78,7 +76,7 @@ add_message_files(
 
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
-	DEPENDENCIES
+    DEPENDENCIES
     std_msgs
     geometry_msgs
 )
@@ -117,11 +115,10 @@ ExternalProject_Add(object_tracking_2d_EXTERNAL
     GIT_REPOSITORY https://github.com/CognitiveRobotics/object_tracking_2D.git
     INSTALL_COMMAND ""
     BUILD_COMMAND "make" # I don't know why this works...
-    CMAKE_ARGS -DBUILD_SHARED_LIBS:BOOL=ON -DOpenCV_DIR=/home/tox/Software/builds/opencv-2.4.9/share/OpenCV -DOpenCV_CONFIG_PATH=/home/tox/Software/builds/opencv-2.4.9/share/OpenCV
+    CMAKE_ARGS -DBUILD_SHARED_LIBS:BOOL=ON
 )
 
-
-# Recover project paths for additional settings.
+# # Recover project paths for additional settings.
 ExternalProject_Get_Property(object_tracking_2d_EXTERNAL
   SOURCE_DIR BINARY_DIR INSTALL_DIR)
 set(object_tracking_2d_INCLUDE_DIRS
@@ -130,118 +127,47 @@ set(object_tracking_2d_INCLUDE_DIRS
 set(3rdparty_INCLUDE_DIRS
   "${object_tracking_2d_INCLUDE_DIRS}/3rdparty"
 )
-
+set(object_tracking_2d_LIBRARIES
+  "${BINARY_DIR}/libobject_tracking_2d.so"
+)
 set(object_tracking_2d_LIBRARIES
   "${BINARY_DIR}/libobject_tracking_2d.so"
 )
 
-# Tell CMake that the external project generated a library so we
-# can add dependencies here instead of later.
+# ## Declare a cpp library
+# # Tell CMake that the external project generated a library so we
+# # can add dependencies here instead of later.
 add_library(object_tracking_2d UNKNOWN IMPORTED)
 set_property(TARGET object_tracking_2d
   PROPERTY IMPORTED_LOCATION
   ${object_tracking_2d_LIBRARIES}
 )
-add_dependencies(object_tracking_2d object_tracking_2d_EXTERNAL)
 
+# ## Specify additional locations of header files
+# ## Your package locations should be listed before other locations
 include_directories(
     include/
     ${catkin_INCLUDE_DIRS}
     ${Eigen_INCLUDE_DIRS}
     ${OpenCV_INCLUDE_DIRS}
-    ${Yaml_INCLUDE_DIRS}
     ${object_tracking_2d_INCLUDE_DIRS}
     ${3rdparty_INCLUDE_DIRS}
 )
 
-add_executable(object_tracking_2d_ros src/object_tracking_2d_ros.cpp)
-target_link_libraries(object_tracking_2d_ros ${catkin_LIBRARIES})
-target_link_libraries(object_tracking_2d_ros ${Eigen_LIBRARIES})
-target_link_libraries(object_tracking_2d_ros ${OpenCV_LIBRARIES})
-target_link_libraries(object_tracking_2d_ros ${Yaml_LIBRARIES})
-target_link_libraries(object_tracking_2d_ros object_tracking_2d)
-add_dependencies(object_tracking_2d_ros ${PROJECT_NAME}_gencpp)
-
-install(TARGETS object_tracking_2d_ros
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION} 
-)
-
-install(FILES ${object_tracking_2d_LIBRARIES}
-  DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# # Recover project paths for additional settings.
-# ExternalProject_Get_Property(object_tracking_2d_EXTERNAL
-#   SOURCE_DIR BINARY_DIR INSTALL_DIR)
-# set(object_tracking_2d_INCLUDE_DIRS
-#   "${SOURCE_DIR}"
-# )
-# set(object_tracking_2d_LIBRARIES
-#   "${BINARY_DIR}/libobject_tracking_2d.so"
-# )
-
-# ## Declare a cpp library
-# # Tell CMake that the external project generated a library so we
-# # can add dependencies here instead of later.
-# add_library(object_tracking_2d UNKNOWN IMPORTED)
-# # add_library(object_tracking_2d UNKNOWN IMPORTED)
-# set_property(TARGET object_tracking_2d
-#   PROPERTY IMPORTED_LOCATION
-#   ${object_tracking_2d_LIBRARIES}
-# )
-
-# ## Specify additional locations of header files
-# ## Your package locations should be listed before other locations
-# include_directories(
-#     include/
-#     ${catkin_INCLUDE_DIRS}
-#     ${Eigen_INCLUDE_DIRS}
-#     ${OpenCV_INCLUDE_DIRS}
-#     ${Yaml_INCLUDE_DIRS}
-#     ${apriltags_swatbotics_INCLUDE_DIRS}
-# )
-
 # ## Declare a cpp executable
-# add_executable(object_tracking_2d_node src/object_tracking_2d_node.cpp)
+add_executable(object_tracking_2d_ros src/object_tracking_2d_ros.cpp)
 
 # ## Add cmake target dependencies of the executable/library
 # ## as an example, message headers may need to be generated before nodes
-# add_dependencies(object_tracking_2d_node object_tracking_2d_generate_messages_cpp)
+add_dependencies(object_tracking_2d object_tracking_2d_EXTERNAL)
 
 # ## Specify libraries to link a library or executable target against
-# target_link_libraries(object_tracking_2d_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(object_tracking_2d_ros
+    ${catkin_LIBRARIES}
+    ${Eigen_LIBRARIES}
+    ${OpenCV_LIBRARIES}
+    object_tracking_2d
+)
 
 # #############
 # ## Install ##
@@ -257,12 +183,12 @@ install(FILES ${object_tracking_2d_LIBRARIES}
 # #   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # # )
 
-# ## Mark executables and/or libraries for installation
-# install(TARGETS object_tracking_2d object_tracking_2d_node
-#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+ ## Mark executables and/or libraries for installation
+ install(TARGETS object_tracking_2d_ros
+   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+ )
 
 # ## Mark cpp header files for installation
 # install(DIRECTORY include/${PROJECT_NAME}/
@@ -271,13 +197,11 @@ install(FILES ${object_tracking_2d_LIBRARIES}
 #   PATTERN ".svn" EXCLUDE
 # )
 
-# ## Mark other files for installation (e.g. launch and bag files, etc.)
-# # install(FILES
-# #   # myfile1
-# #   # myfile2
-# #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-# # )
-
+ ## Mark other files for installation (e.g. launch and bag files, etc.)
+install(FILES
+    ${object_tracking_2d_LIBRARIES}
+    DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+)
 # #############
 # ## Testing ##
 # #############

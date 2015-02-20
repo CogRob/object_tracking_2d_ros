@@ -91,18 +91,18 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-	INCLUDE_DIRS include
-	LIBRARIES object_tracking_2d_ros
-	CATKIN_DEPENDS
-		cv_bridge
-		std_msgs
-		sensor_msgs
-		image_transport
-		roscpp
-		cmake_modules
-		message_generation
-		geometry_msgs
-	DEPENDS system_lib
+        INCLUDE_DIRS include
+        LIBRARIES object_tracking_2d_ros
+        CATKIN_DEPENDS
+                cv_bridge
+                std_msgs
+                sensor_msgs
+                image_transport
+                roscpp
+                cmake_modules
+                message_generation
+                geometry_msgs
+        DEPENDS system_lib
 )
 
 ###########
@@ -130,9 +130,6 @@ set(3rdparty_INCLUDE_DIRS
 set(object_tracking_2d_LIBRARIES
   "${BINARY_DIR}/libobject_tracking_2d.so"
 )
-set(object_tracking_2d_LIBRARIES
-  "${BINARY_DIR}/libobject_tracking_2d.so"
-)
 
 # ## Declare a cpp library
 # # Tell CMake that the external project generated a library so we
@@ -145,8 +142,7 @@ set_property(TARGET object_tracking_2d
 
 # ## Specify additional locations of header files
 # ## Your package locations should be listed before other locations
-include_directories(
-    include/
+include_directories( include
     ${catkin_INCLUDE_DIRS}
     ${Eigen_INCLUDE_DIRS}
     ${OpenCV_INCLUDE_DIRS}
@@ -155,14 +151,15 @@ include_directories(
 )
 
 # ## Declare a cpp executable
-add_executable(object_tracking_2d_ros src/object_tracking_2d_ros.cpp)
+add_library(object_tracking_2d_ros src/object_tracking_2d_ros.cpp)
+add_executable(object_tracking_2d_ros_node src/object_tracking_2d_ros.cpp)
 
 # ## Add cmake target dependencies of the executable/library
 # ## as an example, message headers may need to be generated before nodes
 add_dependencies(object_tracking_2d object_tracking_2d_EXTERNAL)
 
 # ## Specify libraries to link a library or executable target against
-target_link_libraries(object_tracking_2d_ros
+target_link_libraries(object_tracking_2d_ros_node
     ${catkin_LIBRARIES}
     ${Eigen_LIBRARIES}
     ${OpenCV_LIBRARIES}
@@ -184,7 +181,7 @@ target_link_libraries(object_tracking_2d_ros
 # # )
 
  ## Mark executables and/or libraries for installation
- install(TARGETS object_tracking_2d_ros
+ install(TARGETS object_tracking_2d_ros object_tracking_2d_ros_node
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -199,7 +196,7 @@ target_link_libraries(object_tracking_2d_ros
 
  ## Mark other files for installation (e.g. launch and bag files, etc.)
 install(FILES
-    ${object_tracking_2d_LIBRARIES}
+    ${object_tracking_2d_ros_LIBRARIES}
     DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 # #############

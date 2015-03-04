@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   cmake_modules
   message_generation
   geometry_msgs
+  dynamic_reconfigure
 )
 find_package(OpenCV REQUIRED)
 find_package(Eigen REQUIRED)
@@ -73,6 +74,10 @@ add_message_files(
 #   Action1.action
 #   Action2.action
 # )
+
+generate_dynamic_reconfigure_options(
+  cfg/object_tracking_2d_ros.cfg
+)
 
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
@@ -156,7 +161,13 @@ add_executable(object_tracking_2d_ros_node src/object_tracking_2d_ros.cpp)
 
 # ## Add cmake target dependencies of the executable/library
 # ## as an example, message headers may need to be generated before nodes
-add_dependencies(object_tracking_2d object_tracking_2d_EXTERNAL)
+# make sure configure headers are built before any node using them
+add_dependencies(object_tracking_2d
+    object_tracking_2d_EXTERNAL
+    ${PROJECT_NAME}_gencfg)
+
+add_dependencies(object_tracking_2d_ros_node
+    ${PROJECT_NAME}_gencfg)
 
 # ## Specify libraries to link a library or executable target against
 target_link_libraries(object_tracking_2d_ros_node

@@ -8,6 +8,7 @@
 // Include object_tracking_2d_ros message types
 #include "ObjectDetection.h"
 #include <object_tracking_2d_ros/ObjectDetections.h>
+#include <object_tracking_2d_ros/object_tracking_2d_rosConfig.h>
 
 
 // Define the default topic names
@@ -26,6 +27,11 @@ ros::Publisher marker_publisher_;
 ros::Publisher ebt_publisher_;
 ros::Subscriber info_subscriber;
 image_transport::Subscriber image_subscriber;
+
+
+// Config
+object_tracking_2d_ros::object_tracking_2d_rosConfig config_;
+typedef object_tracking_2d_ros::object_tracking_2d_rosConfig Config;
 
 // EBT plugin perams
 std::string ebt_tracker_type_;
@@ -83,3 +89,4 @@ void InitializeROSNode();
 
 // Global EBT tracker
 TrackerBase* tracker_;
+

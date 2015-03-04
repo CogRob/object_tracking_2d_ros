@@ -4,6 +4,7 @@
 #include <ros/single_subscriber_publisher.h>
 #include <sensor_msgs/Image.h>
 #include <image_transport/image_transport.h>
+#include <dynamic_reconfigure/server.h>
 
 // Include OpenCV for images and viewer
 #include <opencv/cv.h>
@@ -25,6 +26,7 @@
 
 //Include the base of object_tracking_2d_ros
 #include "object_tracking_2d_ros.h"
+#include <object_tracking_2d_ros/object_tracking_2d_rosConfig.h>
 
 
 using namespace std;
@@ -66,6 +68,8 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
                               0.5*subscribed_gray.cols);
 
     // Apply the tracker to the image
+    tracker_->setCannyHigh(ebt_th_canny_h_);
+    tracker_->setCannyLow(ebt_th_canny_l_);
     tracker_->setImage(subscribed_gray);
     tracker_->tracking();
 
@@ -232,6 +236,14 @@ void GetParameterValues()
     node_->param("viewer", viewer_, true);
 }
 
+void ParameterCallback(object_tracking_2d_ros::object_tracking_2d_rosConfig &config, uint32_t level) {
+  ROS_INFO("Reconfigure Request: %d %d",
+           config.ebt_th_canny_l,
+           config.ebt_th_canny_h);
+  ebt_th_canny_l_ = config.ebt_th_canny_l;
+  ebt_th_canny_h_ = config.ebt_th_canny_h;
+}
+
 void SetupPublisher()
 {
     // Add callbacks
@@ -300,6 +312,7 @@ void InitializeROSNode(int argc, char **argv)
     ros::init(argc, argv, "object_tracking_2d_ros");
     node_ =  boost::make_shared<ros::NodeHandle>("~");
     image_ = boost::make_shared<image_transport::ImageTransport>(*node_);
+
 }
 
 int main(int argc, char **argv)
@@ -321,6 +334,13 @@ int main(int argc, char **argv)
     ROS_INFO("ObjectTrackin2D node started.");
     running_ = false;
     has_camera_info_ = false;
+
+    dynamic_reconfigure::Server<Config> server;
+    dynamic_reconfigure::Server<Config>::CallbackType f;
+
+    f = boost::bind(&ParameterCallback, _1, _2);
+    server.setCallback(f);
+
     ros::spin();
     ROS_INFO("ObjectTrackin2D node stopped.");
 

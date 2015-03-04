@@ -283,6 +283,10 @@ void InitializeTracker()
     tracker_->setNetworkMode(false);
     tracker_->setConsideringDullEdges(ebt_dull_edge_);
     tracker_->setTracking(true);
+
+    tracker_->setCannyHigh(ebt_th_canny_h_);
+    tracker_->setCannyLow(ebt_th_canny_l_);
+
     std::string input = "ach";
     std::string ach_channel = "none";
 

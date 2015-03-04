@@ -15,24 +15,27 @@
 		<arg name="load_driver" value="true" />
 	</include>
 
-	<node pkg="object_tracking_2d_ros" type="object_tracking_2d_ros" name="object_tracking_2d_ros">
+	<node pkg="object_tracking_2d_ros" type="object_tracking_2d_ros_node" name="object_tracking_2d_ros">
 		<!-- EBT TRACKER -->
-		<param name="ebt_tracker_type"        value="irls"/> <!-- name tracker (irls, pf, pf_textureless) -->
+		<param name="ebt_tracker_type"        value="pf"/> <!-- name tracker (irls, pf, pf_textureless) -->
 			<param name="ebt_num_particle"    value="10"/> <!-- number of particles -->
 			<param name="ebt_min_keypoint"    value="20"/> <!-- min number of keypoint matches to start tracking -->
 			<param name="ebt_th_cm"           value="0.2"/> <!-- threshold of chamfer matching -->
-		<param name="ebt_obj_path"            value="$(find object_tracking_2d_ros)/data/Waterglass_white_800"/> <!-- path of traget object -->
-		<param name="ebt_mesh_path"           value="package://object_tracking_2d_ros/data/Waterglass_white_800/Waterglass_white_800.dae"/> <!-- path of traget mesh -->
-			<rosparam param = "ebt_init_pose">[1,0,0,0,0,1,0,0,0,0,1,0.5,0,0,0,1]</rosparam>
+		<param name="ebt_obj_path"            value="$(find object_tracking_2d_ros)/data/wing_basic"/> <!-- path of traget object -->
+		<param name="ebt_mesh_path"           value="package://object_tracking_2d_ros/data/wing_basic/wing_basic.dae"/> <!-- path of traget mesh -->
+			<rosparam param = "ebt_init_pose">[1,0,0,0,0,1,0,0,0,0,1,2.0,0,0,0,1]</rosparam>
 			<param name="ebt_dull_edge"       value="false"/> <!-- consider dull edges -->
-			<param name="ebt_sample_step"     value="0.0001f"/> <!-- sample step -->
+			<param name="ebt_sample_step"     value="0.03"/> <!-- sample step -->
 			<param name="ebt_intrinsic"       value="$(find object_tracking_2d_ros)/data/Intrinsics_normal.xml"/> <!-- intrinsics parameters -->
 			<param name="ebt_distortion"      value="$(find object_tracking_2d_ros)/data/Distortion_normal.xml"/> <!-- distortion parameters -->
-			<param name="ebt_display"         value="false"/> <!-- display results or not -->
+			<param name="ebt_display"         value="true"/> <!-- display results or not -->
+
+			<param name="ebt_th_canny_l"      value="100"/> <!-- low canny edge threshold -->
+			<param name="ebt_th_canny_h"      value="120"/> <!-- high canny edge threshold -->
 
 		<param name="~viewer"       value="true"/> <!-- display results or not -->
-		<remap from="~image"        to="/usb_cam/image_raw"/>
-		<remap from="~camera_info"  to="/usb_cam/image_raw/camera_info"/>
+		<remap from="~image"        to="/camera/rgb/image_rect_color"/>
+		<remap from="~camera_info"  to="/camera/rgb/camera_info"/>
 		<remap from="~marker_array" to="/object_tracking_2d_ros/marker_array"/>
 		<remap from="~detections"   to="/object_tracking_2d_ros/detections"/>
 	</node>

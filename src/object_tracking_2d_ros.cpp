@@ -72,7 +72,7 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
     // Convert pose matrix from CvMat to Eigen
     CvMat* pose_cv_;
     Eigen::Matrix4d pose_;
-    pose_cv_ = tracker_->obj_model_->pose_;
+    pose_cv_ = tracker_->getPose();
     for(int r = 0; r < 4; r++){
         for(int c = 0; c < 4; c++){
             pose_(r,c) = CV_MAT_ELEM(*pose_cv_, float, r, c);
@@ -92,14 +92,6 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
     object_tracking_2d_ros::ObjectDetections object_detections;
     object_detections.header.frame_id = msg->header.frame_id;
     object_detections.header.stamp = msg->header.stamp;
-
-    if(viewer_)
-    {
-        // Render the results for the viewer
-        CvScalar color = cvScalar(255,255,0);
-        tracker_->obj_model_->displayPoseLine(tracker_->img_result_, pose_cv_, color, 1, false);
-        tracker_->obj_model_->displaySamplePointsAndErrors(tracker_->img_edge_);
-    }
 
     // Loop over each detection
     for(unsigned int i = 0; i < detections.size(); ++i)
@@ -165,8 +157,11 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
     if(viewer_)
     {
         // Show the results for the viewer
-        cv::Mat my_image = tracker_->img_edge_;
-        cv::imshow("ObjectTrackin2D", my_image);
+        tracker_->renderResults();
+        cv::Mat img_result = tracker_->getResultImage();
+        cv::Mat img_edge   = tracker_->getEdgeImage();
+        cv::imshow("ObjectTrackin2D:Result", img_result);
+        cv::imshow("ObjectTrackin2D:Edges",  img_edge);
     }
 }
 
@@ -317,7 +312,8 @@ int main(int argc, char **argv)
 
     if(viewer_){
         // Make a cv window for the viewer
-        cvNamedWindow("ObjectTrackin2D");
+        cvNamedWindow("ObjectTrackin2D:Result");
+        cvNamedWindow("ObjectTrackin2D:Edges");
         cvStartWindowThread();
     }
 
@@ -329,7 +325,8 @@ int main(int argc, char **argv)
     ROS_INFO("ObjectTrackin2D node stopped.");
 
     //Destroying Stuff
-    cvDestroyWindow("ObjectTrackin2D");
+    cvDestroyWindow("ObjectTrackin2D:Result");
+    cvDestroyWindow("ObjectTrackin2D:Edges");
     delete tracker_;
 
     return EXIT_SUCCESS;

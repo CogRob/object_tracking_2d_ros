@@ -28,7 +28,7 @@
 			<param name="ebt_sample_step"     value="0.03"/> <!-- sample step -->
 			<param name="ebt_intrinsic"       value="$(find object_tracking_2d_ros)/data/Intrinsics_normal.xml"/> <!-- intrinsics parameters -->
 			<param name="ebt_distortion"      value="$(find object_tracking_2d_ros)/data/Distortion_normal.xml"/> <!-- distortion parameters -->
-			<param name="ebt_display"         value="true"/> <!-- display results or not -->
+			<param name="ebt_display"         value="false"/> <!-- display results or not -->
 
 			<param name="ebt_th_canny_l"      value="100"/> <!-- low canny edge threshold -->
 			<param name="ebt_th_canny_h"      value="120"/> <!-- high canny edge threshold -->

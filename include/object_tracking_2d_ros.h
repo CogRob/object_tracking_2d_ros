@@ -1,15 +1,39 @@
+//Include ROS libraries for node messages
+#include <ros/ros.h>
+#include <ros/forwards.h>
+#include <ros/single_subscriber_publisher.h>
+#include <sensor_msgs/Image.h>
+#include <image_transport/image_transport.h>
+#include <dynamic_reconfigure/server.h>
+
+// Include OpenCV for images and viewer
+#include <opencv/cv.h>
+#include <opencv/highgui.h>
+#include <cv_bridge/cv_bridge.h>
+
+//Include Eigen tools for pose handeling
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+
+//Include Visualization tools for mesh marker
+#include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
+#include <interactive_markers/interactive_marker_server.h>
+
+//Include Boost tools for detection arrays
+#include <boost/unordered_set.hpp>
+#include <boost/unordered_map.hpp>
+#include <boost/make_shared.hpp>
 
 // Include the trackers from the object_tracking_2d project
 #include "include/object_tracking_2D/tracker_irls.h"
 #include "include/object_tracking_2D/tracker_pf_texture.h"
 #include "include/object_tracking_2D/tracker_pf_textureless.h"
 
-
 // Include object_tracking_2d_ros message types
 #include "ObjectDetection.h"
 #include <object_tracking_2d_ros/ObjectDetections.h>
 #include <object_tracking_2d_ros/object_tracking_2d_rosConfig.h>
-
 
 // Define the default topic names
 const std::string DEFAULT_IMAGE_TOPIC = "image";

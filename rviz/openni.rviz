@@ -6,7 +6,6 @@ Panels:
       Expanded:
         - /Global Options1
         - /TF1/Frames1
-        - /PointCloud21/Status1
       Splitter Ratio: 0.598726
     Tree Height: 514
   - Class: rviz/Selection
@@ -54,21 +53,15 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
-        base_link:
-          Value: false
         camera_depth_frame:
-          Value: false
-        camera_depth_optical_frame:
-          Value: false
-        camera_link:
-          Value: false
-        camera_rgb_frame:
-          Value: false
-        camera_rgb_optical_frame:
-          Value: false
-        odom:
           Value: true
-        world:
+        camera_depth_optical_frame:
+          Value: true
+        camera_link:
+          Value: true
+        camera_rgb_frame:
+          Value: true
+        camera_rgb_optical_frame:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -76,16 +69,13 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        world:
-          odom:
-            base_link:
-              camera_link:
-                camera_depth_frame:
-                  camera_depth_optical_frame:
-                    {}
-                camera_rgb_frame:
-                  camera_rgb_optical_frame:
-                    {}
+        camera_link:
+          camera_depth_frame:
+            camera_depth_optical_frame:
+              {}
+          camera_rgb_frame:
+            camera_rgb_optical_frame:
+              {}
       Update Interval: 0
       Value: true
     - Class: rviz/MarkerArray
@@ -160,10 +150,19 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
+    - Class: rviz/InteractiveMarkers
+      Enable Transparency: true
+      Enabled: true
+      Name: InteractiveMarkers
+      Show Axes: false
+      Show Descriptions: true
+      Show Visual Aids: false
+      Update Topic: /object_tracking_2d_ros/update
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: world
+    Fixed Frame: camera_link
     Frame Rate: 30
   Name: root
   Tools:

@@ -14,6 +14,9 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   geometry_msgs
   dynamic_reconfigure
+  interactive_markers
+  visualization_msgs
+  tf
 )
 find_package(OpenCV REQUIRED)
 find_package(Eigen REQUIRED)
@@ -118,9 +121,10 @@ catkin_package(
 include(ExternalProject)
 ExternalProject_Add(object_tracking_2d_EXTERNAL
     GIT_REPOSITORY https://github.com/CognitiveRobotics/object_tracking_2D.git
+    GIT_TAG origin/hotfix/object_tracking_2d_ros
     INSTALL_COMMAND ""
     BUILD_COMMAND "make" # I don't know why this works...
-    CMAKE_ARGS -DBUILD_SHARED_LIBS:BOOL=ON
+    CMAKE_ARGS -DBUILD_SHARED_LIBS:BOOL=ON -DOpenCV_DIR=/home/tox/Software/builds/opencv-2.4.9/share/OpenCV -DOpenCV_CONFIG_PATH=/home/tox/Software/builds/opencv-2.4.9/share/OpenCV
 )
 
 # # Recover project paths for additional settings.

@@ -40,6 +40,8 @@ const std::string DEFAULT_IMAGE_TOPIC = "image";
 const std::string DEFAULT_CAMERA_INFO_TOPIC = "camera_info";
 const std::string DEFAULT_MARKER_TOPIC = "marker_array";
 const std::string DEFAULT_DETECTIONS_TOPIC = "detections";
+const std::string DEFAULT_IMAGE_RESULT_TOPIC = "image_result";
+const std::string DEFAULT_IMAGE_EDGE_TOPIC = "image_edge";
 
 // ROS parts
 ros::NodeHandlePtr node_;
@@ -51,6 +53,8 @@ ros::Publisher marker_publisher_;
 ros::Publisher ebt_publisher_;
 ros::Subscriber info_subscriber;
 image_transport::Subscriber image_subscriber;
+ros::Publisher img_result_publisher_;
+ros::Publisher img_edge_publisher_;
 
 
 // Config
@@ -78,6 +82,7 @@ int ebt_th_canny_h_;
 
 // Settings and local information
 bool viewer_;
+bool viewing_;
 bool running_;
 bool has_camera_info_;
 std::string display_type_;

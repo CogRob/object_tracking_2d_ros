@@ -130,14 +130,37 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
     marker_publisher_.publish(marker_transforms);
     ebt_publisher_.publish(object_detections);
 
-    if(viewer_)
+    // If viewing the tracking results
+    if(viewer_ || viewing_)
     {
-        // Show the results for the viewer
+        // Render the results and edges
         tracker_->renderResults();
         cv::Mat img_result = tracker_->getResultImage();
         cv::Mat img_edge   = tracker_->getEdgeImage();
-        cv::imshow("ObjectTrackin2D:Result", img_result);
-        cv::imshow("ObjectTrackin2D:Edges",  img_edge);
+
+        // If using opencv viewer
+        if(viewer_){
+            cv::imshow("ObjectTrackin2D:Result", img_result);
+            cv::imshow("ObjectTrackin2D:Edges",  img_edge);
+        }
+
+        // If viewing over message subscription
+        if(viewing_){
+            cv_bridge::CvImage cvi;
+            cvi.header = msg->header;
+
+            cvi.encoding = "rgb8";
+            cvi.image = img_result;
+            sensor_msgs::Image img_result_msg;
+            cvi.toImageMsg(img_result_msg);
+            img_result_publisher_.publish (img_result_msg);
+
+            cvi.encoding = "bgr8";
+            cvi.image = img_edge;
+            sensor_msgs::Image img_edge_msg;
+            cvi.toImageMsg(img_edge_msg);
+            img_edge_publisher_.publish (img_edge_msg);
+        }
     }
 }
 
@@ -185,6 +208,38 @@ void DisconnectCallback(const ros::SingleSubscriberPublisher& info)
     }
 }
 
+void ViewerConnectCallback(const ros::SingleSubscriberPublisher& info)
+{
+    // Check for subscribers.
+    uint32_t subscribers = img_result_publisher_.getNumSubscribers()
+            + img_edge_publisher_.getNumSubscribers();
+    ROS_DEBUG("Viewer Subscription detected! (%d subscribers)", subscribers);
+
+    if(subscribers && !viewing_)
+    {
+        ROS_DEBUG("New Subscribers, Enabling ROS viewer.");
+        viewing_ = true;
+    }
+}
+
+void ViewerDisconnectHandler()
+{
+}
+
+void ViewerDisconnectCallback(const ros::SingleSubscriberPublisher& info)
+{
+    // Check for subscribers.
+    uint32_t subscribers = img_result_publisher_.getNumSubscribers()
+            + img_edge_publisher_.getNumSubscribers();
+    ROS_DEBUG("Viewer Unsubscription detected! (%d subscribers)", subscribers);
+
+    if(!subscribers && viewing_)
+    {
+        ROS_DEBUG("No Subscribers, Disabling ROS viewer.");
+        viewing_ = false;
+    }
+}
+
 void GetParameterValues()
 {
     // Load node-wide configuration values.
@@ -205,7 +260,7 @@ void GetParameterValues()
     node_->param ("ebt_th_canny_l", ebt_th_canny_l_, 100);
     node_->param ("ebt_th_canny_h", ebt_th_canny_h_, 120);
     node_->param ("ebt_display", ebt_display_, false);
-    node_->param("viewer", viewer_, true);
+    node_->param("viewer", viewer_, false);
 }
 
 void ParameterCallback(object_tracking_2d_ros::object_tracking_2d_rosConfig &config, uint32_t level) {
@@ -228,6 +283,17 @@ void SetupPublisher()
                 disconnect_callback);
     ebt_publisher_ = node_->advertise<object_tracking_2d_ros::ObjectDetections>(
                 DEFAULT_DETECTIONS_TOPIC, 1, connect_callback, disconnect_callback);
+
+
+    // Add Viewing callbacks
+    ros::SubscriberStatusCallback viewer_connect_callback = &ViewerConnectCallback;
+    ros::SubscriberStatusCallback viewer_disconnect_callback = &ViewerDisconnectCallback;
+
+    // Viewing Publisher
+    img_result_publisher_ = node_->advertise<sensor_msgs::Image>(
+                DEFAULT_IMAGE_RESULT_TOPIC, 1, viewer_connect_callback, viewer_disconnect_callback);
+    img_edge_publisher_ = node_->advertise<sensor_msgs::Image>(
+                DEFAULT_IMAGE_EDGE_TOPIC, 1, viewer_connect_callback, viewer_disconnect_callback);
 }
 
 void InitializeTracker()
@@ -313,6 +379,7 @@ int main(int argc, char **argv)
     // Start Node
     ROS_INFO("ObjectTrackin2D node started.");
     running_ = false;
+    viewing_ = false;
     has_camera_info_ = false;
 
     dynamic_reconfigure::Server<Config> server;
@@ -320,70 +387,69 @@ int main(int argc, char **argv)
     f = boost::bind(&ParameterCallback, _1, _2);
     server.setCallback(f);
 
-    // create an interactive marker server on the topic namespace simple_marker
-    interactive_markers::InteractiveMarkerServer server1("object_tracking_2d_ros");
-
-    // create an interactive marker for our server
-    visualization_msgs::InteractiveMarker int_marker;
-    int_marker.header.frame_id = "/camera_link";
-    int_marker.name = "my_marker";
-    int_marker.description = "Simple 1-DOF Control";
-
-    // create a grey marker_transform marker
-    visualization_msgs::Marker box_marker;
-    // Set the attributes for the marker
-    box_marker.type = visualization_msgs::Marker::MESH_RESOURCE;
-    box_marker.mesh_resource = ebt_mesh_path_;
-    box_marker.scale.x = 1;
-    box_marker.scale.y = 1;
-    box_marker.scale.z = 1;
-    box_marker.color.r = 0.0;
-    box_marker.color.g = 1.0;
-    box_marker.color.b = 0.0;
-    box_marker.color.a = 0.5;
-
-      // create a non-interactive control which contains the box
-      visualization_msgs::InteractiveMarkerControl box_control;
-      box_control.always_visible = true;
-      box_control.markers.push_back( box_marker );
-
-      // add the control to the interactive marker
-      int_marker.controls.push_back( box_control );
-
-      // create a control which will move the box
-      // this control does not contain any markers,
-      // which will cause RViz to insert two arrows
-      visualization_msgs::InteractiveMarkerControl control;
-      // make a control that rotates around the view axis
-        control.orientation_mode = visualization_msgs::InteractiveMarkerControl::VIEW_FACING;
-        control.interaction_mode = visualization_msgs::InteractiveMarkerControl::ROTATE_3D;
-        control.orientation.w = 1;
-        control.name = "rotate";
-
-        int_marker.controls.push_back(control);
-
-        // create a box in the center which should not be view facing,
-        // but move in the camera plane.
-        control.orientation_mode = visualization_msgs::InteractiveMarkerControl::VIEW_FACING;
-        control.interaction_mode = visualization_msgs::InteractiveMarkerControl::MOVE_PLANE;
-        control.independent_marker_orientation = true;
-        control.name = "move";
-
-        control.markers.push_back( box_marker );
-        control.always_visible = true;
-
-        int_marker.controls.push_back(control);
-
-      // add the interactive marker to our collection &
-      // tell the server to call processFeedback() when feedback arrives for it
-      server1.insert(int_marker, &processFeedback);
-
-      // 'commit' changes and send to all clients
-      server1.applyChanges();
 
 
 
+//    // create an interactive marker server on the topic namespace simple_marker
+//    interactive_markers::InteractiveMarkerServer server1("object_tracking_2d_ros");
 
+//    // create an interactive marker for our server
+//    visualization_msgs::InteractiveMarker int_marker;
+//    int_marker.header.frame_id = "/camera_link";
+//    int_marker.name = "my_marker";
+//    int_marker.description = "Simple 1-DOF Control";
+
+//    // create a grey marker_transform marker
+//    visualization_msgs::Marker box_marker;
+//    // Set the attributes for the marker
+//    box_marker.type = visualization_msgs::Marker::MESH_RESOURCE;
+//    box_marker.mesh_resource = ebt_mesh_path_;
+//    box_marker.scale.x = 1;
+//    box_marker.scale.y = 1;
+//    box_marker.scale.z = 1;
+//    box_marker.color.r = 0.0;
+//    box_marker.color.g = 1.0;
+//    box_marker.color.b = 0.0;
+//    box_marker.color.a = 0.5;
+
+//      // create a non-interactive control which contains the box
+//      visualization_msgs::InteractiveMarkerControl box_control;
+//      box_control.always_visible = true;
+//      box_control.markers.push_back( box_marker );
+
+//      // add the control to the interactive marker
+//      int_marker.controls.push_back( box_control );
+
+//      // create a control which will move the box
+//      // this control does not contain any markers,
+//      // which will cause RViz to insert two arrows
+//      visualization_msgs::InteractiveMarkerControl control;
+//      // make a control that rotates around the view axis
+//        control.orientation_mode = visualization_msgs::InteractiveMarkerControl::VIEW_FACING;
+//        control.interaction_mode = visualization_msgs::InteractiveMarkerControl::ROTATE_3D;
+//        control.orientation.w = 1;
+//        control.name = "rotate";
+
+//        int_marker.controls.push_back(control);
+
+//        // create a box in the center which should not be view facing,
+//        // but move in the camera plane.
+//        control.orientation_mode = visualization_msgs::InteractiveMarkerControl::VIEW_FACING;
+//        control.interaction_mode = visualization_msgs::InteractiveMarkerControl::MOVE_PLANE;
+//        control.independent_marker_orientation = true;
+//        control.name = "move";
+
+//        control.markers.push_back( box_marker );
+//        control.always_visible = true;
+
+//        int_marker.controls.push_back(control);
+
+//      // add the interactive marker to our collection &
+//      // tell the server to call processFeedback() when feedback arrives for it
+//      server1.insert(int_marker, &processFeedback);
+
+//      // 'commit' changes and send to all clients
+//      server1.applyChanges();
 
 
 

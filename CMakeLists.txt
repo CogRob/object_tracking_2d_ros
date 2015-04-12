@@ -124,7 +124,7 @@ ExternalProject_Add(object_tracking_2d_EXTERNAL
     GIT_TAG origin/hotfix/object_tracking_2d_ros
     INSTALL_COMMAND ""
     BUILD_COMMAND "make" # I don't know why this works...
-    CMAKE_ARGS -DBUILD_SHARED_LIBS:BOOL=ON -DOpenCV_DIR=/home/tox/Software/builds/opencv-2.4.9/share/OpenCV -DOpenCV_CONFIG_PATH=/home/tox/Software/builds/opencv-2.4.9/share/OpenCV
+    CMAKE_ARGS -DBUILD_SHARED_LIBS:BOOL=ON #-DOpenCV_DIR=/usr/local/share/OpenCV -DOpenCV_CONFIG_PATH=/usr/local/share/OpenCV
 )
 
 # # Recover project paths for additional settings.

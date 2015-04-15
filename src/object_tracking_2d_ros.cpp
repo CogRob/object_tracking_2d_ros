@@ -35,16 +35,14 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
         return;
     }
     cv::Mat subscribed_gray = subscribed_ptr->image;
-    cv::Mat tmp;
-    cv::Point2d opticalCenter(0.5*subscribed_gray.rows,
-                              0.5*subscribed_gray.cols);
-
 
     // Convert pose matrix from Eigen to CvMat
-    cv::Mat_<double> pose_cv_temp = Mat_<double>::ones(4,4);
-    cv::eigen2cv(pose_,pose_cv_temp);
-    CvMat* pose_cv;
-    *pose_cv = pose_cv_temp;
+    CvMat* pose_cv = cvCreateMat(4, 4, CV_32F);
+    for(int r = 0; r < 4; r++){
+        for(int c = 0; c < 4; c++){
+            CV_MAT_ELEM(*pose_cv, float, r, c) = pose_(r,c);
+        }
+    }
 
     // Apply the tracker to the image
     tracker_->setCannyHigh(ebt_th_canny_h_);
@@ -60,7 +58,6 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
             pose_(r,c) = CV_MAT_ELEM(*pose_cv, float, r, c);
         }
     }
-    //    Eigen::Map<Eigen::Matrix4d> pose( pose_cv_->data );
 
     // Store the detection into an array struture
     ObjectDetection d;
@@ -312,6 +309,8 @@ void SetupSubscriber()
 
 void InitPosesCallback(const object_tracking_2d_ros::ObjectDetections& msg)
 {
+    ROS_DEBUG("Init Poses Message of size %d Recived)", msg.detections.size());
+
     for(unsigned int i = 0; i < msg.detections.size(); ++i)
     {
         geometry_msgs::Pose m = msg.detections[i].pose;
@@ -369,6 +368,13 @@ void InitializeTracker()
     CvMat* pose_init_ = cvCreateMat(4, 4, CV_32F);
     for (int i = 0; i < 16; i++){
         pose_init_->data.fl[i] = ebt_init_pose_[i];
+    }
+
+    // Convert pose matrix from CvMat to Eigen
+    for(int r = 0; r < 4; r++){
+        for(int c = 0; c < 4; c++){
+            pose_(r,c) = CV_MAT_ELEM(*pose_init_, float, r, c);
+        }
     }
 
     // Initialize the desired tracker

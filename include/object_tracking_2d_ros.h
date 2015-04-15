@@ -13,10 +13,7 @@
 // Include OpenCV for images and viewer
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
-#include <opencv2/core/eigen.hpp>
 #include <cv_bridge/cv_bridge.h>
-
-//#include "Eigen2CV.h"
 
 //Include Visualization tools for mesh marker
 #include <visualization_msgs/Marker.h>
@@ -55,12 +52,11 @@ sensor_msgs::CameraInfo camera_info_;
 // ROS Publishers and Subscribers
 ros::Publisher marker_publisher_;
 ros::Publisher ebt_publisher_;
+ros::Publisher img_result_publisher_;
+ros::Publisher img_edge_publisher_;
 ros::Subscriber info_subscriber;
 ros::Subscriber init_poses_subscriber;
 image_transport::Subscriber image_subscriber;
-ros::Publisher img_result_publisher_;
-ros::Publisher img_edge_publisher_;
-
 
 // Config
 object_tracking_2d_ros::object_tracking_2d_rosConfig config_;
@@ -129,4 +125,3 @@ void InitializeROSNode();
 
 // Global EBT tracker
 TrackerBase* tracker_;
-

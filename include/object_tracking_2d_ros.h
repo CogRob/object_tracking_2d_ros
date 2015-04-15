@@ -6,14 +6,17 @@
 #include <image_transport/image_transport.h>
 #include <dynamic_reconfigure/server.h>
 
-// Include OpenCV for images and viewer
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
-#include <cv_bridge/cv_bridge.h>
-
 //Include Eigen tools for pose handeling
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+
+// Include OpenCV for images and viewer
+#include <opencv/cv.h>
+#include <opencv/highgui.h>
+#include <opencv2/core/eigen.hpp>
+#include <cv_bridge/cv_bridge.h>
+
+//#include "Eigen2CV.h"
 
 //Include Visualization tools for mesh marker
 #include <visualization_msgs/Marker.h>

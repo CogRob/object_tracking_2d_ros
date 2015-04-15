@@ -41,9 +41,10 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
 
 
     // Convert pose matrix from Eigen to CvMat
+    cv::Mat_<double> pose_cv_temp = Mat_<double>::ones(4,4);
+    cv::eigen2cv(pose_,pose_cv_temp);
     CvMat* pose_cv;
-//    cv::eigen2cv(pose_,pose_cv);
-
+    *pose_cv = pose_cv_temp;
 
     // Apply the tracker to the image
     tracker_->setCannyHigh(ebt_th_canny_h_);
@@ -51,16 +52,15 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
     tracker_->setPose(pose_cv);
     tracker_->setImage(subscribed_gray);
     tracker_->tracking();
+    pose_cv = tracker_->getPose();
 
     // Convert pose matrix from CvMat to Eigen
-    CvMat* pose_cv_;
-    Eigen::Matrix4d pose_;
-    pose_cv_ = tracker_->getPose();
     for(int r = 0; r < 4; r++){
         for(int c = 0; c < 4; c++){
-            pose_(r,c) = CV_MAT_ELEM(*pose_cv_, float, r, c);
+            pose_(r,c) = CV_MAT_ELEM(*pose_cv, float, r, c);
         }
     }
+    //    Eigen::Map<Eigen::Matrix4d> pose( pose_cv_->data );
 
     // Store the detection into an array struture
     ObjectDetection d;

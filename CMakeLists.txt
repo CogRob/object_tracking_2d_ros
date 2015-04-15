@@ -121,7 +121,6 @@ catkin_package(
 include(ExternalProject)
 ExternalProject_Add(object_tracking_2d_EXTERNAL
     GIT_REPOSITORY https://github.com/CognitiveRobotics/object_tracking_2D.git
-    GIT_TAG origin/hotfix/object_tracking_2d_ros
     INSTALL_COMMAND ""
     BUILD_COMMAND "make" # I don't know why this works...
     CMAKE_ARGS -DBUILD_SHARED_LIBS:BOOL=ON -DOpenCV_DIR=/home/tox/Software/builds/opencv-2.4.9/share/OpenCV -DOpenCV_CONFIG_PATH=/home/tox/Software/builds/opencv-2.4.9/share/OpenCV

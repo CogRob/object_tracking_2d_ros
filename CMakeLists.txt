@@ -82,6 +82,7 @@ add_message_files(
 
 generate_dynamic_reconfigure_options(
   cfg/object_tracking_2d_ros.cfg
+  cfg/object_tracking_2d_ros_init.cfg
 )
 
 ## Generate added messages and services with any dependencies listed here

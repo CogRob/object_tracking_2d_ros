@@ -6,14 +6,14 @@
 #include <image_transport/image_transport.h>
 #include <dynamic_reconfigure/server.h>
 
+//Include Eigen tools for pose handeling
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+
 // Include OpenCV for images and viewer
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 #include <cv_bridge/cv_bridge.h>
-
-//Include Eigen tools for pose handeling
-#include <Eigen/Core>
-#include <Eigen/Geometry>
 
 //Include Visualization tools for mesh marker
 #include <visualization_msgs/Marker.h>
@@ -36,12 +36,13 @@
 #include <object_tracking_2d_ros/object_tracking_2d_rosConfig.h>
 
 // Define the default topic names
-const std::string DEFAULT_IMAGE_TOPIC = "image";
+const std::string DEFAULT_IMAGE_TOPIC       = "image";
 const std::string DEFAULT_CAMERA_INFO_TOPIC = "camera_info";
-const std::string DEFAULT_MARKER_TOPIC = "marker_array";
-const std::string DEFAULT_DETECTIONS_TOPIC = "detections";
-const std::string DEFAULT_IMAGE_RESULT_TOPIC = "image_result";
-const std::string DEFAULT_IMAGE_EDGE_TOPIC = "image_edge";
+const std::string DEFAULT_MARKER_TOPIC      = "marker_array";
+const std::string DEFAULT_DETECTIONS_TOPIC  = "detections";
+const std::string DEFAULT_IMAGE_RESULT_TOPIC= "image_result";
+const std::string DEFAULT_IMAGE_EDGE_TOPIC  = "image_edge";
+const std::string DEFAULT_INIT_POSES_TOPIC  = "init_poses";
 
 // ROS parts
 ros::NodeHandlePtr node_;
@@ -51,11 +52,11 @@ sensor_msgs::CameraInfo camera_info_;
 // ROS Publishers and Subscribers
 ros::Publisher marker_publisher_;
 ros::Publisher ebt_publisher_;
-ros::Subscriber info_subscriber;
-image_transport::Subscriber image_subscriber;
 ros::Publisher img_result_publisher_;
 ros::Publisher img_edge_publisher_;
-
+ros::Subscriber info_subscriber;
+ros::Subscriber init_poses_subscriber;
+image_transport::Subscriber image_subscriber;
 
 // Config
 object_tracking_2d_ros::object_tracking_2d_rosConfig config_;
@@ -80,6 +81,9 @@ bool ebt_display_;
 int ebt_th_canny_l_;
 int ebt_th_canny_h_;
 
+// EBT plugin global
+Eigen::Matrix4d pose_;
+
 // Settings and local information
 bool viewer_;
 bool viewing_;
@@ -101,6 +105,9 @@ void ConnectCallback(const ros::SingleSubscriberPublisher& info);
 // Callback for unsubcription
 void DisconnectCallback(const ros::SingleSubscriberPublisher& info);
 
+// Callback for initializing pose
+void InitPosesCallback(const object_tracking_2d_ros::ObjectDetections& msg);
+
 // Handler for unsubcription
 void DisconnectHandler();
 
@@ -118,4 +125,3 @@ void InitializeROSNode();
 
 // Global EBT tracker
 TrackerBase* tracker_;
-

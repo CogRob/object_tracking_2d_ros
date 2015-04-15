@@ -35,23 +35,27 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
         return;
     }
     cv::Mat subscribed_gray = subscribed_ptr->image;
-    cv::Mat tmp;
-    cv::Point2d opticalCenter(0.5*subscribed_gray.rows,
-                              0.5*subscribed_gray.cols);
+
+    // Convert pose matrix from Eigen to CvMat
+    CvMat* pose_cv = cvCreateMat(4, 4, CV_32F);
+    for(int r = 0; r < 4; r++){
+        for(int c = 0; c < 4; c++){
+            CV_MAT_ELEM(*pose_cv, float, r, c) = pose_(r,c);
+        }
+    }
 
     // Apply the tracker to the image
     tracker_->setCannyHigh(ebt_th_canny_h_);
     tracker_->setCannyLow(ebt_th_canny_l_);
+    tracker_->setPose(pose_cv);
     tracker_->setImage(subscribed_gray);
     tracker_->tracking();
+    pose_cv = tracker_->getPose();
 
     // Convert pose matrix from CvMat to Eigen
-    CvMat* pose_cv_;
-    Eigen::Matrix4d pose_;
-    pose_cv_ = tracker_->getPose();
     for(int r = 0; r < 4; r++){
         for(int c = 0; c < 4; c++){
-            pose_(r,c) = CV_MAT_ELEM(*pose_cv_, float, r, c);
+            pose_(r,c) = CV_MAT_ELEM(*pose_cv, float, r, c);
         }
     }
 
@@ -296,6 +300,31 @@ void SetupPublisher()
                 DEFAULT_IMAGE_EDGE_TOPIC, 1, viewer_connect_callback, viewer_disconnect_callback);
 }
 
+void SetupSubscriber()
+{
+    // Subscriber
+    init_poses_subscriber = (*node_).subscribe(
+                DEFAULT_INIT_POSES_TOPIC, 1, &InitPosesCallback);
+}
+
+void InitPosesCallback(const object_tracking_2d_ros::ObjectDetections& msg)
+{
+    ROS_DEBUG("Init Poses Message of size %d Recived)", msg.detections.size());
+
+    for(unsigned int i = 0; i < msg.detections.size(); ++i)
+    {
+        geometry_msgs::Pose m = msg.detections[i].pose;
+        Eigen::Translation3d t(m.position.x,
+                               m.position.y,
+                               m.position.z);
+        Eigen::Quaterniond r(m.orientation.w,
+                             m.orientation.x,
+                             m.orientation.y,
+                             m.orientation.z);
+        pose_ = (t * r).matrix();
+    }
+}
+
 void InitializeTracker()
 {
     // Create the desired tracker
@@ -341,6 +370,13 @@ void InitializeTracker()
         pose_init_->data.fl[i] = ebt_init_pose_[i];
     }
 
+    // Convert pose matrix from CvMat to Eigen
+    for(int r = 0; r < 4; r++){
+        for(int c = 0; c < 4; c++){
+            pose_(r,c) = CV_MAT_ELEM(*pose_init_, float, r, c);
+        }
+    }
+
     // Initialize the desired tracker
     tracker_->initTracker(ebt_obj_path_, input, ebt_intrinsic_, ebt_distortion_, ebt_width_, ebt_height_, pose_init_ , ach_channel);
 }
@@ -353,20 +389,13 @@ void InitializeROSNode(int argc, char **argv)
 
 }
 
-void processFeedback(
-        const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback )
-{
-    ROS_INFO_STREAM( feedback->marker_name << " is now at "
-                     << feedback->pose.position.x << ", " << feedback->pose.position.y
-                     << ", " << feedback->pose.position.z );
-}
-
 int main(int argc, char **argv)
 {
     // Initialize Node
     InitializeROSNode(argc,argv);
     GetParameterValues();
     SetupPublisher();
+    SetupSubscriber();
     InitializeTracker();
 
     if(viewer_){
@@ -386,72 +415,6 @@ int main(int argc, char **argv)
     dynamic_reconfigure::Server<Config>::CallbackType f;
     f = boost::bind(&ParameterCallback, _1, _2);
     server.setCallback(f);
-
-
-
-
-//    // create an interactive marker server on the topic namespace simple_marker
-//    interactive_markers::InteractiveMarkerServer server1("object_tracking_2d_ros");
-
-//    // create an interactive marker for our server
-//    visualization_msgs::InteractiveMarker int_marker;
-//    int_marker.header.frame_id = "/camera_link";
-//    int_marker.name = "my_marker";
-//    int_marker.description = "Simple 1-DOF Control";
-
-//    // create a grey marker_transform marker
-//    visualization_msgs::Marker box_marker;
-//    // Set the attributes for the marker
-//    box_marker.type = visualization_msgs::Marker::MESH_RESOURCE;
-//    box_marker.mesh_resource = ebt_mesh_path_;
-//    box_marker.scale.x = 1;
-//    box_marker.scale.y = 1;
-//    box_marker.scale.z = 1;
-//    box_marker.color.r = 0.0;
-//    box_marker.color.g = 1.0;
-//    box_marker.color.b = 0.0;
-//    box_marker.color.a = 0.5;
-
-//      // create a non-interactive control which contains the box
-//      visualization_msgs::InteractiveMarkerControl box_control;
-//      box_control.always_visible = true;
-//      box_control.markers.push_back( box_marker );
-
-//      // add the control to the interactive marker
-//      int_marker.controls.push_back( box_control );
-
-//      // create a control which will move the box
-//      // this control does not contain any markers,
-//      // which will cause RViz to insert two arrows
-//      visualization_msgs::InteractiveMarkerControl control;
-//      // make a control that rotates around the view axis
-//        control.orientation_mode = visualization_msgs::InteractiveMarkerControl::VIEW_FACING;
-//        control.interaction_mode = visualization_msgs::InteractiveMarkerControl::ROTATE_3D;
-//        control.orientation.w = 1;
-//        control.name = "rotate";
-
-//        int_marker.controls.push_back(control);
-
-//        // create a box in the center which should not be view facing,
-//        // but move in the camera plane.
-//        control.orientation_mode = visualization_msgs::InteractiveMarkerControl::VIEW_FACING;
-//        control.interaction_mode = visualization_msgs::InteractiveMarkerControl::MOVE_PLANE;
-//        control.independent_marker_orientation = true;
-//        control.name = "move";
-
-//        control.markers.push_back( box_marker );
-//        control.always_visible = true;
-
-//        int_marker.controls.push_back(control);
-
-//      // add the interactive marker to our collection &
-//      // tell the server to call processFeedback() when feedback arrives for it
-//      server1.insert(int_marker, &processFeedback);
-
-//      // 'commit' changes and send to all clients
-//      server1.applyChanges();
-
-
 
     ros::spin();
     ROS_INFO("ObjectTrackin2D node stopped.");

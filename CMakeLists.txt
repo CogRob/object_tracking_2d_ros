@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(object_tracking_2d_ros)
 
+set(CMAKE_BUILD_TYPE Debug)
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -80,6 +82,7 @@ add_message_files(
 
 generate_dynamic_reconfigure_options(
   cfg/object_tracking_2d_ros.cfg
+  cfg/object_tracking_2d_ros_init.cfg
 )
 
 ## Generate added messages and services with any dependencies listed here
@@ -121,7 +124,6 @@ catkin_package(
 include(ExternalProject)
 ExternalProject_Add(object_tracking_2d_EXTERNAL
     GIT_REPOSITORY https://github.com/CognitiveRobotics/object_tracking_2D.git
-    GIT_TAG origin/hotfix/object_tracking_2d_ros
     INSTALL_COMMAND ""
     BUILD_COMMAND "make" # I don't know why this works...
     CMAKE_ARGS -DBUILD_SHARED_LIBS:BOOL=ON #-DOpenCV_DIR=/usr/local/share/OpenCV -DOpenCV_CONFIG_PATH=/usr/local/share/OpenCV

@@ -3,6 +3,17 @@ project(object_tracking_2d_ros)
 
 set(CMAKE_BUILD_TYPE Debug)
 
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+if(COMPILER_SUPPORTS_CXX11)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+elseif(COMPILER_SUPPORTS_CXX0X)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+else()
+        message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+endif()
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -162,7 +173,8 @@ include_directories( include
 )
 
 # ## Declare a cpp executable
-add_library(object_tracking_2d_ros src/object_tracking_2d_ros.cpp)
+add_library(user_input_thread       src/user_input_thread.cpp)
+add_library(object_tracking_2d_ros  src/object_tracking_2d_ros.cpp)
 add_executable(object_tracking_2d_ros_node src/object_tracking_2d_ros.cpp)
 
 # ## Add cmake target dependencies of the executable/library
@@ -181,6 +193,7 @@ target_link_libraries(object_tracking_2d_ros_node
     ${Eigen_LIBRARIES}
     ${OpenCV_LIBRARIES}
     object_tracking_2d
+    user_input_thread
 )
 
 # #############

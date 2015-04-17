@@ -87,6 +87,11 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
     tracker_->setCannyLow(ebt_th_canny_l_);
     tracker_->setPose(pose_cv);
     ProcessUserActions();
+    if(ebt_init_){
+        tracker_->init_ = true;
+        tracker_->initialize();
+        ebt_init_ = tracker_->init_;
+    }
     tracker_->setImage(subscribed_gray);
     tracker_->tracking();
     pose_cv = tracker_->getPose();
@@ -289,7 +294,7 @@ void GetParameterValues()
     node_->param ("ebt_tracker_type", ebt_tracker_type_, std::string("irls"));
     node_->param ("ebt_num_particle", ebt_num_particle_, 1);
     node_->param ("ebt_min_keypoint", ebt_min_keypoint_, 20);
-    node_->param ("ebt_init", ebt_init_, false);
+    node_->param ("ebt_init", ebt_init_, true);
     node_->param ("ebt_th_cm", ebt_th_cm_, 0.2);
     node_->param ("ebt_obj_path", ebt_obj_path_, std::string("obj_name"));
     node_->param ("ebt_mesh_path", ebt_mesh_path_, std::string("mesh_path"));

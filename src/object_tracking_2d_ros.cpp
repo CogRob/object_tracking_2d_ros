@@ -9,6 +9,44 @@ Eigen::Matrix4d GetDetectionTransform(ObjectDetection detection)
     return detection.pose;
 }
 
+void ProcessUserActions()
+{
+    char input = remote_input_.c_str()[0];
+    remote_input_ = "";
+
+    if(user_input_thread_ != NULL)
+    {
+        char console_input = user_input_thread_->getInput();
+        if(console_input != 0)
+            input = console_input;
+    }
+
+    switch(input)
+    {
+    case 'q':
+        quit_ = true;
+        ROS_INFO("ObjectTrackin2D user input: QUIT\n");
+        break;
+    case 'r':
+        tracker_->init_ = true;
+        tracker_->initialize();
+//        delete tracker_;
+//        InitializeTracker();
+        ROS_INFO("ObjectTrackin2D user input: RESET\n");
+        break;
+//    case 's':
+//        vo_->start();
+//        printf("SVO user input: START\n");
+//        break;
+    default: ;
+    }
+}
+
+void RemoteKeyCallback(const std_msgs::StringConstPtr& key_input)
+{
+    remote_input_ = key_input->data;
+}
+
 void InfoCallback(const sensor_msgs::CameraInfoConstPtr& camera_info)
 {
     camera_info_ = (*camera_info);
@@ -48,6 +86,12 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
     tracker_->setCannyHigh(ebt_th_canny_h_);
     tracker_->setCannyLow(ebt_th_canny_l_);
     tracker_->setPose(pose_cv);
+    ProcessUserActions();
+    if(ebt_init_){
+        tracker_->init_ = true;
+        tracker_->initialize();
+        ebt_init_ = tracker_->init_;
+    }
     tracker_->setImage(subscribed_gray);
     tracker_->tracking();
     pose_cv = tracker_->getPose();
@@ -250,6 +294,7 @@ void GetParameterValues()
     node_->param ("ebt_tracker_type", ebt_tracker_type_, std::string("irls"));
     node_->param ("ebt_num_particle", ebt_num_particle_, 1);
     node_->param ("ebt_min_keypoint", ebt_min_keypoint_, 20);
+    node_->param ("ebt_init", ebt_init_, true);
     node_->param ("ebt_th_cm", ebt_th_cm_, 0.2);
     node_->param ("ebt_obj_path", ebt_obj_path_, std::string("obj_name"));
     node_->param ("ebt_mesh_path", ebt_mesh_path_, std::string("mesh_path"));
@@ -264,7 +309,8 @@ void GetParameterValues()
     node_->param ("ebt_th_canny_l", ebt_th_canny_l_, 100);
     node_->param ("ebt_th_canny_h", ebt_th_canny_h_, 120);
     node_->param ("ebt_display", ebt_display_, false);
-    node_->param("viewer", viewer_, false);
+    node_->param ("user_input_", user_input_, true);
+    node_->param ("viewer", viewer_, false);
 }
 
 void ParameterCallback(object_tracking_2d_ros::object_tracking_2d_rosConfig &config, uint32_t level) {
@@ -302,9 +348,16 @@ void SetupPublisher()
 
 void SetupSubscriber()
 {
-    // Subscriber
+    // Subscribe to init pose messages
     init_poses_subscriber = (*node_).subscribe(
                 DEFAULT_INIT_POSES_TOPIC, 1, &InitPosesCallback);
+
+    // Subscribe to remote input
+    if(user_input_){
+        user_input_thread_ = boost::make_shared<vk::UserInputThread>();
+    }
+    sub_remote_key_ = (*node_).subscribe(
+                DEFAULT_USER_INPUT_TOPIC, 5, &RemoteKeyCallback);
 }
 
 void InitPosesCallback(const object_tracking_2d_ros::ObjectDetections& msg)
@@ -313,15 +366,19 @@ void InitPosesCallback(const object_tracking_2d_ros::ObjectDetections& msg)
 
     for(unsigned int i = 0; i < msg.detections.size(); ++i)
     {
-        geometry_msgs::Pose m = msg.detections[i].pose;
-        Eigen::Translation3d t(m.position.x,
-                               m.position.y,
-                               m.position.z);
-        Eigen::Quaterniond r(m.orientation.w,
-                             m.orientation.x,
-                             m.orientation.y,
-                             m.orientation.z);
-        pose_ = (t * r).matrix();
+        if(not msg.detections[i].good){
+            geometry_msgs::Pose m = msg.detections[i].pose;
+            Eigen::Translation3d t(m.position.x,
+                                   m.position.y,
+                                   m.position.z);
+            Eigen::Quaterniond r(m.orientation.w,
+                                 m.orientation.x,
+                                 m.orientation.y,
+                                 m.orientation.z);
+            pose_ = (t * r).matrix();
+        }
+
+        ebt_init_ = msg.detections[i].init;
     }
 }
 
@@ -416,13 +473,21 @@ int main(int argc, char **argv)
     f = boost::bind(&ParameterCallback, _1, _2);
     server.setCallback(f);
 
-    ros::spin();
+    // start processing callbacks
+    while(ros::ok() && !quit_)
+    {
+        ros::spinOnce();
+    }
     ROS_INFO("ObjectTrackin2D node stopped.");
 
     //Destroying Stuff
     cvDestroyWindow("ObjectTrackin2D:Result");
     cvDestroyWindow("ObjectTrackin2D:Edges");
     delete tracker_;
+    if(user_input_thread_ != NULL)
+    {
+        user_input_thread_->stop();
+    }
 
     return EXIT_SUCCESS;
 }

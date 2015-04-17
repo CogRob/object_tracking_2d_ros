@@ -23,7 +23,7 @@ def talker():
     p = Pose()
     p.position.x = 0
     p.position.y = 0
-    p.position.z = 1
+    p.position.z = .35
     p.orientation.x = 0
     p.orientation.y = 0
     p.orientation.z = 0
@@ -33,6 +33,8 @@ def talker():
     msg.detections.append(ObjectDetection())
     msg.detections[0].id = "1"
     msg.detections[0].pose = p
+    msg.detections[0].good = False
+    msg.detections[0].init = True    
 
     while not rospy.is_shutdown():
         rospy.loginfo(msg)

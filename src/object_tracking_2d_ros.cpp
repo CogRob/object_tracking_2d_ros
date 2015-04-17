@@ -107,7 +107,8 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
     ObjectDetection d;
     d.pose = pose_;
     d.good = true;
-    d.id = 1;
+    d.id = 0;
+    d.ns = ebt_obj_id_;
     ObjectDetectionArray detections;
     detections.push_back(d);
 
@@ -135,10 +136,10 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
         visualization_msgs::Marker marker_transform;
         marker_transform.header.frame_id = msg->header.frame_id;
         marker_transform.header.stamp = msg->header.stamp;
-        stringstream convert;
-        convert << "tag" << detections[i].id;
-        marker_transform.ns = convert.str().c_str();
+//        stringstream convert;
+//        convert << "tag" << detections[i].id;
         marker_transform.id = detections[i].id;
+        marker_transform.ns = detections[i].ns;
 
         // Set the object mesh for the marker
         marker_transform.type = visualization_msgs::Marker::MESH_RESOURCE;
@@ -168,6 +169,7 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
         object_tracking_2d_ros::ObjectDetection object_det;
         object_det.header = marker_transform.header;
         object_det.id = marker_transform.id;
+        object_det.ns = marker_transform.ns;
         object_det.pose = marker_transform.pose;
 
         // Add the detection to detection array message
@@ -311,6 +313,9 @@ void GetParameterValues()
     node_->param ("ebt_display", ebt_display_, false);
     node_->param ("user_input_", user_input_, true);
     node_->param ("viewer", viewer_, false);
+
+    boost::filesystem::path p(ebt_obj_path_);
+    ebt_obj_id_ = p.filename().string();
 }
 
 void ParameterCallback(object_tracking_2d_ros::object_tracking_2d_rosConfig &config, uint32_t level) {
@@ -366,19 +371,21 @@ void InitPosesCallback(const object_tracking_2d_ros::ObjectDetections& msg)
 
     for(unsigned int i = 0; i < msg.detections.size(); ++i)
     {
-        if(not msg.detections[i].good){
-            geometry_msgs::Pose m = msg.detections[i].pose;
-            Eigen::Translation3d t(m.position.x,
-                                   m.position.y,
-                                   m.position.z);
-            Eigen::Quaterniond r(m.orientation.w,
-                                 m.orientation.x,
-                                 m.orientation.y,
-                                 m.orientation.z);
-            pose_ = (t * r).matrix();
-        }
+        if(ebt_obj_id_.compare(msg.detections[i].ns)){
+            if(not msg.detections[i].good){
+                geometry_msgs::Pose m = msg.detections[i].pose;
+                Eigen::Translation3d t(m.position.x,
+                                       m.position.y,
+                                       m.position.z);
+                Eigen::Quaterniond r(m.orientation.w,
+                                     m.orientation.x,
+                                     m.orientation.y,
+                                     m.orientation.z);
+                pose_ = (t * r).matrix();
+            }
 
-        ebt_init_ = msg.detections[i].init;
+            ebt_init_ = msg.detections[i].init;
+        }
     }
 }
 

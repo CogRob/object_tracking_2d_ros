@@ -26,6 +26,7 @@
 #include <boost/unordered_set.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/filesystem.hpp>
 
 // Include the trackers from the object_tracking_2d project
 #include "include/object_tracking_2D/tracker_irls.h"
@@ -34,6 +35,7 @@
 
 // Include object_tracking_2d_ros message types
 #include "ObjectDetection.h"
+#include <object_tracking_2d_ros/ObjectDetection.h>
 #include <object_tracking_2d_ros/ObjectDetections.h>
 #include <object_tracking_2d_ros/object_tracking_2d_rosConfig.h>
 
@@ -77,6 +79,7 @@ int ebt_min_keypoint_;
 bool ebt_init_;
 double ebt_th_cm_;
 std::string ebt_obj_path_;
+std::string ebt_obj_id_;
 std::string ebt_mesh_path_;
 std::vector<float> ebt_init_pose_;
 bool ebt_dull_edge_;

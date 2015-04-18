@@ -91,6 +91,7 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
         tracker_->init_ = true;
         tracker_->initialize();
         ebt_init_ = tracker_->init_;
+        ROS_INFO("ObjectTrackin2D message input: RESET\n");
     }
     tracker_->setImage(subscribed_gray);
     tracker_->tracking();
@@ -371,7 +372,7 @@ void InitPosesCallback(const object_tracking_2d_ros::ObjectDetections& msg)
 
     for(unsigned int i = 0; i < msg.detections.size(); ++i)
     {
-        if(ebt_obj_id_.compare(msg.detections[i].ns)){
+        if(!ebt_obj_id_.compare(msg.detections[i].ns)){
             if(not msg.detections[i].good){
                 geometry_msgs::Pose m = msg.detections[i].pose;
                 Eigen::Translation3d t(m.position.x,

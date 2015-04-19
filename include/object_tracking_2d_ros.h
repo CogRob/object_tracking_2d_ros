@@ -94,6 +94,7 @@ int ebt_th_canny_h_;
 
 // EBT plugin global
 Eigen::Matrix4d pose_;
+CvMat* pose_init_;
 
 // Settings and local information
 bool viewer_;

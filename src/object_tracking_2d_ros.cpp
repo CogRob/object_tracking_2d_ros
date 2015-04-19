@@ -28,16 +28,15 @@ void ProcessUserActions()
         ROS_INFO("ObjectTrackin2D user input: QUIT\n");
         break;
     case 'r':
+        tracker_->setPose(pose_init_);
         tracker_->init_ = true;
         tracker_->initialize();
-//        delete tracker_;
-//        InitializeTracker();
         ROS_INFO("ObjectTrackin2D user input: RESET\n");
         break;
-//    case 's':
-//        vo_->start();
-//        printf("SVO user input: START\n");
-//        break;
+    case 'k':
+        tracker_->saveKeyframe();
+        ROS_INFO("ObjectTrackin2D user input: SAVE KEYFRAME\n");
+        break;
     default: ;
     }
 }
@@ -430,7 +429,7 @@ void InitializeTracker()
     std::string ach_channel = "none";
 
     // oeverwrite pose_init
-    CvMat* pose_init_ = cvCreateMat(4, 4, CV_32F);
+    pose_init_ = cvCreateMat(4, 4, CV_32F);
     for (int i = 0; i < 16; i++){
         pose_init_->data.fl[i] = ebt_init_pose_[i];
     }

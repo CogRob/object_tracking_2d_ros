@@ -4,9 +4,9 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
+        - /TF1/Frames1
         - /Camera1/Visibility1
-        - /Results1
-      Splitter Ratio: 0.258856
+      Splitter Ratio: 0.784387
     Tree Height: 498
   - Class: rviz/Selection
     Name: Selection
@@ -54,13 +54,13 @@ Visualization Manager:
       Frames:
         All Enabled: false
         camera_depth_frame:
-          Value: true
+          Value: false
         camera_depth_optical_frame:
-          Value: true
+          Value: false
         camera_link:
           Value: true
         camera_rgb_frame:
-          Value: true
+          Value: false
         camera_rgb_optical_frame:
           Value: true
       Marker Scale: 1
@@ -77,22 +77,6 @@ Visualization Manager:
             camera_rgb_optical_frame:
               {}
       Update Interval: 0
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /object1/object_tracking_2d_ros/marker_array
-      Name: Detections
-      Namespaces:
-        tag1: true
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /object2/object_tracking_2d_ros/marker_array
-      Name: Detections2
-      Namespaces:
-        tag1: true
-      Queue Size: 100
       Value: true
     - Arrow Length: 0.05
       Class: rviz/PoseArray
@@ -139,6 +123,24 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /apriltags/marker_array
+      Name: Apriltags
+      Namespaces:
+        tag4: true
+        tag5: true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /object_tracking_2d_ros/marker_array
+      Name: Detections
+      Namespaces:
+        crayola_box.obj: true
+        orange_juice_carton.obj: true
+      Queue Size: 100
+      Value: true
     - Class: rviz/Camera
       Enabled: true
       Image Rendering: background and overlay
@@ -149,40 +151,16 @@ Visualization Manager:
       Transport Hint: raw
       Value: true
       Visibility:
-        Camera2: false
+        Apriltags: true
         Detections: true
-        Detections2: false
-        Edges: false
+        Edges1: false
         Edges2: true
         Grid: true
         OmniMapper Control: false
         PointCloud2: false
         PoseArray: false
-        Results: false
-        TF: false
-        Value: true
-      Zoom Factor: 1
-    - Class: rviz/Camera
-      Enabled: true
-      Image Rendering: background and overlay
-      Image Topic: /camera/rgb/image_rect_color
-      Name: Camera2
-      Overlay Alpha: 0.5
-      Queue Size: 2
-      Transport Hint: raw
-      Value: true
-      Visibility:
-        Camera: false
-        Camera2: true
-        Detections: false
-        Detections2: true
-        Edges: false
-        Edges2: true
-        Grid: true
-        OmniMapper Control: false
-        PointCloud2: false
-        PoseArray: false
-        Results: false
+        Results1: false
+        Results2: true
         TF: false
         Value: true
       Zoom Factor: 1
@@ -192,7 +170,7 @@ Visualization Manager:
       Max Value: 1
       Median window: 5
       Min Value: 0
-      Name: Edges
+      Name: Results1
       Normalize Range: true
       Queue Size: 2
       Transport Hint: raw
@@ -203,7 +181,7 @@ Visualization Manager:
       Max Value: 1
       Median window: 5
       Min Value: 0
-      Name: Edges2
+      Name: Results2
       Normalize Range: true
       Queue Size: 2
       Transport Hint: raw
@@ -214,7 +192,18 @@ Visualization Manager:
       Max Value: 1
       Median window: 5
       Min Value: 0
-      Name: Results
+      Name: Edges1
+      Normalize Range: true
+      Queue Size: 2
+      Transport Hint: raw
+      Value: true
+    - Class: rviz/Image
+      Enabled: true
+      Image Topic: /object2/object_tracking_2d_ros/image_edge
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: Edges2
       Normalize Range: true
       Queue Size: 2
       Transport Hint: raw
@@ -243,7 +232,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 0.566789
+      Distance: 1.11874
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
@@ -267,15 +256,17 @@ Window Geometry:
     collapsed: false
   Displays:
     collapsed: false
-  Edges:
+  Edges1:
     collapsed: false
   Edges2:
     collapsed: false
   Height: 1056
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd0000000400000000000002f0000003dafc020000000afb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006400fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000002800000281000000dd00fffffffb0000000a0056006900650077007301000002af00000153000000b000fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000000a0049006d00610067006500000002f9000000c800000000000000000000000100000152000003dafc0200000007fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000e00430061006d00650072006100320100000028000000da0000001600fffffffb0000000c0045006400670065007300320100000108000000e00000001600fffffffb0000000c00430061006d00650072006101000001ee000001050000001600fffffffb0000000c00430061006d0065007200610100000028000001d50000000000000000fc000002f900000109000000340100001dfa000000010100000003fb0000000e0052006500730075006c007400730100000000ffffffff0000006300fffffffb0000000a004500640067006500730100000000ffffffff0000005b00fffffffb0000000a0049006d00610067006501000005c3000001bd0000000000000000fb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000007800000003bfc0100000002fb0000000800540069006d0065000000000000000780000002f600fffffffb0000000800540069006d00650100000000000004500000000000000000000002f1000003da00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
-  Results:
+  QMainWindow State: 000000ff00000000fd00000004000000000000010f000003dafc020000000afb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006400fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000002800000281000000dd00fffffffb0000000a0056006900650077007301000002af00000153000000b000fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000000a0049006d00610067006500000002f9000000c8000000000000000000000001000001f2000003dafc0200000006fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000e00430061006d00650072006100320000000028000000160000001600000016fb0000000c00430061006d0065007200610100000028000001ea0000001600fffffffb0000000c00430061006d0065007200610100000028000001d50000000000000000fc00000218000001ea000000340100001dfa000000000100000005fb0000000c0045006400670065007300320100000000ffffffff0000006400fffffffb000000100052006500730075006c0074007300310100000000ffffffff0000006c00fffffffb000000100052006500730075006c0074007300320100000000ffffffff0000006d00fffffffb0000000c0045006400670065007300310100000000ffffffff0000006300fffffffb0000000a0049006d00610067006501000005c3000001bd0000000000000000fb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000007800000003bfc0100000002fb0000000800540069006d0065000000000000000780000002f600fffffffb0000000800540069006d0065010000000000000450000000000000000000000473000003da00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  Results1:
+    collapsed: false
+  Results2:
     collapsed: false
   Selection:
     collapsed: false
@@ -285,6 +276,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: false
-  Width: 1855
-  X: 1985
+  Width: 1920
+  X: 1680
   Y: 24

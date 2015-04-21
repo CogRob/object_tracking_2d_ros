@@ -31,10 +31,11 @@ def talker():
 
     msg.header = h
     msg.detections.append(ObjectDetection())
-    msg.detections[0].id = "1"
+    msg.detections[0].id = 1
+    msg.detections[0].ns = "crayola_box.obj"
     msg.detections[0].pose = p
     msg.detections[0].good = False
-    msg.detections[0].init = True    
+    msg.detections[0].init = False    
 
     while not rospy.is_shutdown():
         rospy.loginfo(msg)

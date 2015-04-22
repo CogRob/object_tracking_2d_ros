@@ -16,7 +16,7 @@
 	</include>
 
 	<env name="ROSCONSOLE_CONFIG_FILE" 
-       value="$(find object_tracking_2d_ros)/launch/custom_rosconsole.conf"/>
+       value="$(find object_tracking_2d_ros)/cfg/custom_rosconsole.conf"/>
 
 	<node pkg="object_tracking_2d_ros" type="object_tracking_2d_ros_node" name="object_tracking_2d_ros" output="screen">
 		<!-- EBT TRACKER -->

@@ -311,7 +311,7 @@ void GetParameterValues()
     node_->param ("ebt_th_canny_l", ebt_th_canny_l_, 100);
     node_->param ("ebt_th_canny_h", ebt_th_canny_h_, 120);
     node_->param ("ebt_display", ebt_display_, false);
-    node_->param ("user_input_", user_input_, true);
+    node_->param ("user_input", user_input_, true);
     node_->param ("viewer", viewer_, false);
 
     boost::filesystem::path p(ebt_obj_path_);

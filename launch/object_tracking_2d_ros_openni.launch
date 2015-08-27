@@ -1,41 +1,38 @@
 <launch>
 	<!-- Start an object_tracking_2d_ros node using the default settings
 	to connect to an OpenNI device (e.g. Kinect). -->
-	<node pkg="apriltags" type="apriltags" name="apriltags">
-		<param name="~default_tag_size" value="0.1524"/>
-		<param name="~viewer" value="1"/>
-
-		<remap from="~image" to="/camera/rgb/image_rect_color"/>
-		<remap from="~camera_info" to="/camera/rgb/camera_info"/>
-		<remap from="~marker_array" to="/apriltags/marker_array"/>
-		<remap from="~detections" to="/apriltags/detections"/>
-	</node>
 	
 	<include file="$(find openni2_launch)/launch/openni2.launch">
-		<arg name="load_driver" value="true" />
+		<arg name="load_driver" value="false" />
 	</include>
+    
 
+    <param name="/use_sim_time" value="true"/>  
+
+    
 	<env name="ROSCONSOLE_CONFIG_FILE" 
-       value="$(find object_tracking_2d_ros)/cfg/custom_rosconsole.conf"/>
+       value="$(find object_tracking_2d_ros)/launch/custom_rosconsole.conf"/>
 
 	<node pkg="object_tracking_2d_ros" type="object_tracking_2d_ros_node" name="object_tracking_2d_ros" output="screen">
 		<!-- EBT TRACKER -->
-		<param name="ebt_tracker_type"        value="irls"/> <!-- name tracker (irls, pf, pf_textureless) -->
-			<param name="ebt_num_particle"    value="10"/> <!-- number of particles -->
+		<param name="ebt_tracker_type"        value="pf"/> <!-- name tracker (irls, pf, pf_textureless) -->
+			<param name="ebt_num_particle"    value="50"/> <!-- number of particles -->
 			<param name="ebt_min_keypoint"    value="20"/> <!-- min number of keypoint matches to start tracking -->
 			<param name="ebt_init"            value="true"/> <!-- initilize using surf or chamfer matching -->
 			<param name="ebt_th_cm"           value="0.001"/> <!-- threshold of chamfer matching -->
-		<param name="ebt_obj_path"            value="$(find object_tracking_2d_ros)/data/crayola_box/crayola_box.obj"/> <!-- path of traget object -->
-		<param name="ebt_mesh_path"           value="package://object_tracking_2d_ros/data/crayola_box/crayola_box.dae"/> <!-- path of traget mesh -->
-			<rosparam param = "ebt_init_pose">[1,0,0,0,0,1,0,0,0,0,1,0.4,0,0,0,1]</rosparam>
+		<param name="ebt_obj_path"            value="$(find object_tracking_2d_ros)/data/ronzoni1/ronzoni1.obj"/> <!-- path of traget object -->
+		<param name="ebt_mesh_path"           value="package://object_tracking_2d_ros/data/ronzoni1/ronzoni1.dae"/> <!-- path of traget mesh -->
+			<rosparam param = "ebt_init_pose">[1,0,0,0,0,1,0,0,0,0,1,0.8,0,0,0,1]</rosparam>
 			<param name="ebt_dull_edge"       value="false"/> <!-- consider dull edges -->
-			<param name="ebt_sample_step"     value="0.001"/> <!-- sample step -->
-			<param name="ebt_intrinsic"       value="$(find object_tracking_2d_ros)/data/Intrinsics_normal.xml"/> <!-- intrinsics parameters -->
-			<param name="ebt_distortion"      value="$(find object_tracking_2d_ros)/data/Distortion_normal.xml"/> <!-- distortion parameters -->
+			<param name="ebt_sample_step"     value="0.005"/> <!-- sample step -->
+			<param name="ebt_intrinsic"       value="$(find object_tracking_2d_ros)/data/Intrinsics_kinect_dataset.xml"/> <!-- intrinsics parameters -->
+			<param name="ebt_distortion"      value="$(find object_tracking_2d_ros)/data/Distortion_kinect.xml"/> <!-- distortion parameters -->
 			<param name="ebt_display"         value="false"/> <!-- display results or not -->
 
 			<param name="ebt_th_canny_l"      value="100"/> <!-- low canny edge threshold -->
 			<param name="ebt_th_canny_h"      value="120"/> <!-- high canny edge threshold -->
+            <param name="user_input_"         value="false"/>
+
 
 		<param name="~viewer"       value="false"/> <!-- display results or not -->
 		<remap from="~image"        to="/camera/rgb/image_rect_color"/>
@@ -48,6 +45,7 @@
 
 
 	<!-- RVIZ to view the visualization -->
+
 	<node name="RVIZ" pkg="rviz" type="rviz" args=" -d $(find object_tracking_2d_ros)/rviz/openni.rviz"/>
 	<!-- <node name="reconfigure_gui" pkg="dynamic_reconfigure" type="reconfigure_gui" /> -->
 	<!-- <node pkg="dynamic_reconfigure" type="reconfigure_gui" name="object_tracking_2d_ros_config" args="/object_tracking_2d_ros/reconfigure" /> -->

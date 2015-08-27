@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<opencv_storage>
+<keypoint2d003 type_id="opencv-matrix">
+  <rows>5</rows>
+  <cols>1</cols>
+  <dt>"2f"</dt>
+  <data>
+    3.13946106e+02 2.35527145e+02 3.27046326e+02 2.41782120e+02
+    3.20700928e+02 3.80285828e+02 2.46530304e+02 3.15817596e+02
+    2.26425140e+02 2.85944824e+02</data></keypoint2d003>
+</opencv_storage>

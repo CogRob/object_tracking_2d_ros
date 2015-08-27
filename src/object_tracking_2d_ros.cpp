@@ -2,6 +2,7 @@
 #include "object_tracking_2d_ros.h"
 
 using namespace std;
+int num_of_frames = 0;
 
 Eigen::Matrix4d GetDetectionTransform(ObjectDetection detection)
 {
@@ -72,6 +73,7 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
         return;
     }
     cv::Mat subscribed_gray = subscribed_ptr->image;
+    num_of_frames+=1;
 
     // Convert pose matrix from Eigen to CvMat
     CvMat* pose_cv = cvCreateMat(4, 4, CV_32F);
@@ -86,14 +88,24 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
     tracker_->setCannyLow(ebt_th_canny_l_);
     tracker_->setPose(pose_cv);
     ProcessUserActions();
-    if(ebt_init_){
+///    if()
+//    ebt_init_ =true;
+    if(ebt_init_ /*&& (num_of_frames < 5)*/){
         tracker_->init_ = true;
         tracker_->initialize();
+        pose_cv = tracker_->getPose();
+        cv::Mat pse_temp = cv::Mat(pose_cv);
+        std::cout<<pse_temp<<std::endl;
         ebt_init_ = tracker_->init_;
+       // std::cout<<"ObjectTrackin2D message input: RESET"<<std::endl;
         ROS_INFO("ObjectTrackin2D message input: RESET\n");
     }
     tracker_->setImage(subscribed_gray);
     tracker_->tracking();
+
+    if(ebt_init_)
+        return;
+
     pose_cv = tracker_->getPose();
 
     // Convert pose matrix from CvMat to Eigen
@@ -102,6 +114,7 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
             pose_(r,c) = CV_MAT_ELEM(*pose_cv, float, r, c);
         }
     }
+    std::cout<<"The pose is"<<pose_<<std::endl;
 
     // Store the detection into an array struture
     ObjectDetection d;
@@ -355,7 +368,7 @@ void SetupSubscriber()
 {
     // Subscribe to init pose messages
     init_poses_subscriber = (*node_).subscribe(
-                DEFAULT_INIT_POSES_TOPIC, 1, &InitPosesCallback);
+                DEFAULT_INIT_POSES_TOPIC , 1, &InitPosesCallback);
 
     // Subscribe to remote input
     if(user_input_){
@@ -368,7 +381,7 @@ void SetupSubscriber()
 void InitPosesCallback(const object_tracking_2d_ros::ObjectDetections& msg)
 {
     ROS_DEBUG("Init Poses Message of size %d Recived)", msg.detections.size());
-
+    std::cout<<"Init Poses Message of size %d Recived)"<<msg.detections.size()<<std::endl;
     for(unsigned int i = 0; i < msg.detections.size(); ++i)
     {
         if(!ebt_obj_id_.compare(msg.detections[i].ns)){
@@ -384,7 +397,9 @@ void InitPosesCallback(const object_tracking_2d_ros::ObjectDetections& msg)
                 pose_ = (t * r).matrix();
             }
 
+            std::cout<<"Pose"<<pose_<<std::endl;
             ebt_init_ = msg.detections[i].init;
+           // ebt_init_ = true;
         }
     }
 }

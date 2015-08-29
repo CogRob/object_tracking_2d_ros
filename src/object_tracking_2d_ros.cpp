@@ -32,6 +32,7 @@ void ProcessUserActions()
         tracker_->setPose(pose_init_);
         tracker_->init_ = true;
         tracker_->initialize();
+        ebt_init_ = tracker_ ->init_;
         ROS_INFO("ObjectTrackin2D user input: RESET\n");
         break;
     case 'k':
@@ -89,6 +90,8 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
     tracker_->setPose(pose_cv);
     ProcessUserActions();
 ///    if()
+//    ebt_init_ =true;
+    std::cout<<"The pose before"<<ebt_init_<<std::endl;
 //    ebt_init_ =true;
     if(ebt_init_ /*&& (num_of_frames < 5)*/){
         tracker_->init_ = true;
@@ -415,6 +418,7 @@ void InitializeTracker()
     else if(ebt_tracker_type_.compare("pf") == 0)
     {
         tracker_ = new TextureParticleFilterTracker ();
+        tracker_->setMinKeypointMatches(ebt_min_keypoint_);
         ((TextureParticleFilterTracker*)tracker_)->setNumParticle(ebt_num_particle_);
         ((TextureParticleFilterTracker*)tracker_)->initParticleFilter();
     }

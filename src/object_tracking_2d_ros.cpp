@@ -175,7 +175,7 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
         object_det.header = marker_transform.header;
         object_det.id = marker_transform.id;
         object_det.ns = marker_transform.ns;
-        object_det.pose = marker_transform.pose;
+        object_det.pose.pose = marker_transform.pose;
 
         // Add the detection to detection array message
         object_detections.detections.push_back(object_det);
@@ -377,7 +377,7 @@ void InitPosesCallback(const object_tracking_2d_ros::ObjectDetections& msg)
     {
         if(!ebt_obj_id_.compare(msg.detections[i].ns)){
             if(not msg.detections[i].good){
-                geometry_msgs::Pose m = msg.detections[i].pose;
+                geometry_msgs::Pose m = msg.detections[i].pose.pose;
                 Eigen::Translation3d t(m.position.x,
                                        m.position.y,
                                        m.position.z);

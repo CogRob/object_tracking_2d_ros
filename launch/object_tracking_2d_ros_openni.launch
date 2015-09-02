@@ -5,7 +5,7 @@
 
 	<node pkg="object_tracking_2d_ros" type="object_tracking_2d_ros_node" name="object_tracking_2d_ros" output="screen">
 		<!-- EBT TRACKER -->
-		<param name="ebt_tracker_type"    value="pf"/> <!-- name tracker (irls, pf, pf_textureless) -->
+		<param name="ebt_tracker_type"    value="irls"/> <!-- name tracker (irls, pf, pf_textureless) -->
 		<param name="ebt_num_particle"    value="20"/> <!-- number of particles -->
 		<param name="ebt_min_keypoint"    value="15"/> <!-- min number of keypoint matches to start tracking -->
 		<param name="ebt_init"            value="true"/> <!-- initilize using surf or chamfer matching -->

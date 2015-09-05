@@ -34,10 +34,10 @@ void ProcessUserActions()
         ebt_init_ = tracker_ ->init_;
         ROS_INFO("ObjectTrackin2D user input: RESET\n");
         break;
-    case 'k':
-        tracker_->saveKeyframe();
-        ROS_INFO("ObjectTrackin2D user input: SAVE KEYFRAME\n");
-        break;
+//    case 'k':
+//        tracker_->saveKeyframe();
+//        ROS_INFO("ObjectTrackin2D user input: SAVE KEYFRAME\n");
+//        break;
     default: ;
     }
 }
@@ -76,6 +76,7 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
 
     // Convert pose matrix from Eigen to CvMat
     CvMat* pose_cv = cvCreateMat(4, 4, CV_32F);
+    CvMat* cov_cv = cvCreateMat(6, 6, CV_32F);
     for(int r = 0; r < 4; r++){
         for(int c = 0; c < 4; c++){
             CV_MAT_ELEM(*pose_cv, float, r, c) = pose_(r,c);
@@ -100,11 +101,19 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
         return;
 
     pose_cv = tracker_->getPose();
+    cov_cv = tracker_->getCovariance();
 
     // Convert pose matrix from CvMat to Eigen
     for(int r = 0; r < 4; r++){
         for(int c = 0; c < 4; c++){
             pose_(r,c) = CV_MAT_ELEM(*pose_cv, float, r, c);
+        }
+    }
+
+    // Convert cov matrix from CvMat to double array
+    for(int r = 0; r < 6; r++){
+        for(int c = 0; c < 6; c++){
+            cov_[r*6+c] = CV_MAT_ELEM(*cov_cv, float, r, c);
         }
     }
 
@@ -176,6 +185,7 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
         object_det.id = marker_transform.id;
         object_det.ns = marker_transform.ns;
         object_det.pose.pose = marker_transform.pose;
+        object_det.pose.covariance = cov_;
 
         // Add the detection to detection array message
         object_detections.detections.push_back(object_det);

@@ -5,7 +5,7 @@
 
 	<node pkg="object_tracking_2d_ros" type="object_tracking_2d_ros_node" name="object_tracking_2d_ros" output="screen">
 		<!-- EBT TRACKER -->
-		<param name="ebt_tracker_type"    value="irls"/> <!-- name tracker (irls, pf, pf_textureless) -->
+		<param name="ebt_tracker_type"    value="pf"/> <!-- name tracker (irls, pf, pf_textureless) -->
 		<param name="ebt_num_particle"    value="20"/> <!-- number of particles -->
 		<param name="ebt_min_keypoint"    value="15"/> <!-- min number of keypoint matches to start tracking -->
 		<param name="ebt_init"            value="true"/> <!-- initilize using surf or chamfer matching -->
@@ -14,7 +14,7 @@
 		<param name="ebt_mesh_path"       value="package://object_tracking_2d_ros/data/ronzoni1/ronzoni1.dae"/> <!-- path of traget mesh -->
 		<rosparam param = "ebt_init_pose">[1,0,0,0,0,1,0,0,0,0,1,0.4,0,0,0,1]</rosparam>
 		<param name="ebt_dull_edge"       value="false"/> <!-- consider dull edges -->
-		<param name="ebt_sample_step"     value="0.005"/> <!-- sample step -->
+		<param name="ebt_sample_step"     value="0.01"/> <!-- sample step -->
 		<param name="ebt_intrinsic"       value="$(find object_tracking_2d_ros)/data/Intrinsics_normal.xml"/> <!-- intrinsics parameters -->
 		<param name="ebt_distortion"      value="$(find object_tracking_2d_ros)/data/Distortion_normal.xml"/> <!-- distortion parameters -->
 		<param name="ebt_display"         value="false"/> <!-- display results or not -->

@@ -91,6 +91,8 @@ std::string ebt_distortion_;
 bool ebt_display_;
 int ebt_th_canny_l_;
 int ebt_th_canny_h_;
+double ebt_th_valid_ratio_;
+int ebt_maxd_;
 
 // EBT plugin global
 Eigen::Matrix4d pose_;

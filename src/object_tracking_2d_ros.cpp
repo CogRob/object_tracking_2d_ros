@@ -53,6 +53,17 @@ void InfoCallback(const sensor_msgs::CameraInfoConstPtr& camera_info)
     has_camera_info_ = true;
 }
 
+void ApplyTrackerSettingsCallback(TrackerBase* tracker)
+{
+    tracker->setCannyHigh(ebt_th_canny_h_);
+    tracker->setCannyLow(ebt_th_canny_l_);
+    tracker->setValidSamplePointsRatio(ebt_th_valid_ratio_);
+    tracker->setSampleStep(ebt_sample_step_);
+    tracker->setMaxSearchDistance(ebt_maxd_);
+    tracker->setConsideringDullEdges(ebt_dull_edge_);
+    tracker->setMinKeypointMatches(ebt_min_keypoint_);
+}
+
 void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
     // Dont atempt to use the image without having info about the camera first
@@ -84,8 +95,7 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
     }
 
     // Apply the tracker to the image
-    tracker_->setCannyHigh(ebt_th_canny_h_);
-    tracker_->setCannyLow(ebt_th_canny_l_);
+    ApplyTrackerSettingsCallback(tracker_);
     tracker_->setPose(pose_cv);
     ProcessUserActions();
     if(ebt_init_){
@@ -120,7 +130,7 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
     // Store the detection into an array struture
     ObjectDetection d;
     d.pose = pose_;
-    d.good = true;
+    d.good = !tracker_->init_;
     d.id = 0;
     d.ns = ebt_obj_id_;
     ObjectDetectionArray detections;
@@ -135,11 +145,11 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
     // Loop over each detection
     for(unsigned int i = 0; i < detections.size(); ++i)
     {
-        // skip bad detections
-        if(!detections[i].good)
-        {
-            continue;
-        }
+//        // skip bad detections
+//        if(!detections[i].good)
+//        {
+//            continue;
+//        }
 
         // Get quaternion for the marker
         Eigen::Matrix4d pose = GetDetectionTransform(detections[i]);
@@ -186,6 +196,7 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
         object_det.ns = marker_transform.ns;
         object_det.pose.pose = marker_transform.pose;
         object_det.pose.covariance = cov_;
+        object_det.good = d.good;
 
         // Add the detection to detection array message
         object_detections.detections.push_back(object_det);
@@ -325,6 +336,8 @@ void GetParameterValues()
     node_->param ("ebt_distortion", ebt_distortion_, std::string("Distortion_normal.xml"));
     node_->param ("ebt_th_canny_l", ebt_th_canny_l_, 100);
     node_->param ("ebt_th_canny_h", ebt_th_canny_h_, 120);
+    node_->param ("ebt_th_valid_ratio", ebt_th_valid_ratio_, 0.1);
+    node_->param ("ebt_maxd", ebt_maxd_, 32);
     node_->param ("ebt_display", ebt_display_, false);
     node_->param ("user_input", user_input_, true);
     node_->param ("viewer", viewer_, false);
@@ -334,11 +347,14 @@ void GetParameterValues()
 }
 
 void ParameterCallback(object_tracking_2d_ros::object_tracking_2d_rosConfig &config, uint32_t level) {
-    ROS_INFO("Reconfigure Request: %d %d",
-             config.ebt_th_canny_l,
-             config.ebt_th_canny_h);
+    ROS_INFO("Reconfigure Request");
     ebt_th_canny_l_ = config.ebt_th_canny_l;
     ebt_th_canny_h_ = config.ebt_th_canny_h;
+    ebt_th_valid_ratio_ = config.ebt_th_valid_ratio;
+    ebt_sample_step_ = config.ebt_sample_step;
+    ebt_maxd_ = config.ebt_maxd;
+    ebt_dull_edge_ = config.ebt_dull_edge;
+    ebt_min_keypoint_ = config.ebt_min_keypoint;
 }
 
 void SetupPublisher()
@@ -434,6 +450,7 @@ void InitializeTracker()
 
     // Configure the desired tracker
     tracker_->setSampleStep(ebt_sample_step_);
+    tracker_->setMaxSearchDistance(ebt_maxd_);
     tracker_->setDisplay(ebt_display_);
     tracker_->setNetworkMode(false);
     tracker_->setConsideringDullEdges(ebt_dull_edge_);

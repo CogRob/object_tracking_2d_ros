@@ -21,6 +21,9 @@
 
 		<param name="ebt_th_canny_l"      value="100"/> <!-- low canny edge threshold -->
 		<param name="ebt_th_canny_h"      value="120"/> <!-- high canny edge threshold -->
+		<param name="ebt_th_valid_ratio"  value="0.1"/> <!-- valid sample points ratio -->
+		<param name="ebt_maxd"            value="32"/>  <!-- max search distance -->
+
 		<param name="user_input_"         value="false"/>
 
 		<param name="~viewer"       value="false"/> <!-- display results or not -->

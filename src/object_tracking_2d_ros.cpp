@@ -38,7 +38,11 @@ void ProcessUserActions()
 //        tracker_->saveKeyframe();
 //        ROS_INFO("ObjectTrackin2D user input: SAVE KEYFRAME\n");
 //        break;
-    default: ;
+       case '1':
+        ebt_obj_id_ = '1';
+        break;
+    default:
+        ebt_obj_id_ = '0';
     }
 }
 

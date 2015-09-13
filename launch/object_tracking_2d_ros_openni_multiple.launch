@@ -6,27 +6,31 @@
   <group ns="object1">
 		<node pkg="object_tracking_2d_ros" type="object_tracking_2d_ros_node" name="object_tracking_2d_ros" output="screen">
 			<!-- EBT TRACKER -->
-			<param name="ebt_tracker_type"        value="irls"/> <!-- name tracker (irls, pf, pf_textureless) -->
-			<param name="ebt_num_particle"    value="40"/> <!-- number of particles -->
-			<param name="ebt_min_keypoint"    value="20"/> <!-- min number of keypoint matches to start tracking -->
+			<param name="ebt_tracker_type"    value="irls"/> <!-- name tracker (irls, pf, pf_textureless) -->
+			<param name="ebt_num_particle"    value="20"/> <!-- number of particles -->
+			<param name="ebt_min_keypoint"    value="15"/> <!-- min number of keypoint matches to start tracking -->
 			<param name="ebt_init"            value="true"/> <!-- initilize using surf or chamfer matching -->
 			<param name="ebt_th_cm"           value="0.001"/> <!-- threshold of chamfer matching -->
-			<param name="ebt_obj_path"            value="$(find object_tracking_2d_ros)/data/ronzoni1/ronzoni1.obj"/> <!-- path of traget object -->
-			<param name="ebt_mesh_path"           value="package://object_tracking_2d_ros/data/ronzoni1/ronzoni1.dae"/> <!-- path of traget mesh -->
+			<param name="ebt_obj_path"        value="$(find object_tracking_2d_ros)/data/ronzoni1/ronzoni1.obj"/> <!-- path of traget object -->
+			<param name="ebt_mesh_path"       value="package://object_tracking_2d_ros/data/ronzoni1/ronzoni1.dae"/> <!-- path of traget mesh -->
 			<rosparam param = "ebt_init_pose">[1,0,0,0,0,1,0,0,0,0,1,0.4,0,0,0,1]</rosparam>
 			<param name="ebt_dull_edge"       value="false"/> <!-- consider dull edges -->
-			<param name="ebt_sample_step"     value="0.001"/> <!-- sample step -->
+			<param name="ebt_sample_step"     value="0.005"/> <!-- sample step -->
 			<param name="ebt_intrinsic"       value="$(find object_tracking_2d_ros)/data/Intrinsics_normal.xml"/> <!-- intrinsics parameters -->
 			<param name="ebt_distortion"      value="$(find object_tracking_2d_ros)/data/Distortion_normal.xml"/> <!-- distortion parameters -->
 			<param name="ebt_display"         value="false"/> <!-- display results or not -->
 
 			<param name="ebt_th_canny_l"      value="100"/> <!-- low canny edge threshold -->
 			<param name="ebt_th_canny_h"      value="120"/> <!-- high canny edge threshold -->
+			<param name="ebt_th_valid_ratio"  value="0.50"/> <!-- valid sample points ratio -->
+			<param name="ebt_maxd"            value="32"/>  <!-- max search distance -->
+
+			<param name="user_input_"         value="false"/>
 
 			<param name="~viewer"       value="false"/> <!-- display results or not -->
 			<remap from="~image"        to="/camera/rgb/image_rect_color"/>
 			<remap from="~camera_info"  to="/camera/rgb/camera_info"/>
-			<remap from="~marker_array" to="object_tracking_2d_ros/marker_array"/>
+			<remap from="~marker_array" to="/object_tracking_2d_ros/marker_array"/>
 			<remap from="~detections"   to="/object_tracking_2d_ros/detections"/>
 			<remap from="~init_poses"   to="/object_tracking_2d_ros/init_poses"/>
 		</node>
@@ -36,26 +40,63 @@
 		<node pkg="object_tracking_2d_ros" type="object_tracking_2d_ros_node" name="object_tracking_2d_ros" output="screen">
 			<!-- EBT TRACKER -->
 			<param name="ebt_tracker_type"    value="irls"/> <!-- name tracker (irls, pf, pf_textureless) -->
-			<param name="ebt_num_particle"    value="40"/> <!-- number of particles -->
-			<param name="ebt_min_keypoint"    value="10"/> <!-- min number of keypoint matches to start tracking -->
+			<param name="ebt_num_particle"    value="20"/> <!-- number of particles -->
+			<param name="ebt_min_keypoint"    value="15"/> <!-- min number of keypoint matches to start tracking -->
 			<param name="ebt_init"            value="true"/> <!-- initilize using surf or chamfer matching -->
 			<param name="ebt_th_cm"           value="0.001"/> <!-- threshold of chamfer matching -->
-			<param name="ebt_obj_path"        value="$(find object_tracking_2d_ros)/data/crayola_64_ct/crayola_64_ct.obj"/> <!-- path of traget object -->
-			<param name="ebt_mesh_path"       value="package://object_tracking_2d_ros/data/crayola_64_ct/crayola_64_ct.dae"/> <!-- path of traget mesh -->
-			<rosparam param = "ebt_init_pose">[1,0,0,0,0,0,-1,0,0,1,0,0.4,0,0,0,1]</rosparam>
+			<param name="ebt_obj_path"        value="$(find object_tracking_2d_ros)data/orange_juice_carton/orange_juice_carton.obj"/> <!-- path of traget object -->
+			<param name="ebt_mesh_path"       value="package://object_tracking_2d_ros/data/orange_juice_carton/orange_juice_carton.dae"/> <!-- path of traget mesh -->
+			<rosparam param = "ebt_init_pose">[1,0,0,0,0,1,0,0,0,0,1,0.4,0,0,0,1]</rosparam>
 			<param name="ebt_dull_edge"       value="false"/> <!-- consider dull edges -->
-			<param name="ebt_sample_step"     value="0.001"/> <!-- sample step -->
+			<param name="ebt_sample_step"     value="0.005"/> <!-- sample step -->
 			<param name="ebt_intrinsic"       value="$(find object_tracking_2d_ros)/data/Intrinsics_normal.xml"/> <!-- intrinsics parameters -->
 			<param name="ebt_distortion"      value="$(find object_tracking_2d_ros)/data/Distortion_normal.xml"/> <!-- distortion parameters -->
 			<param name="ebt_display"         value="false"/> <!-- display results or not -->
 
 			<param name="ebt_th_canny_l"      value="100"/> <!-- low canny edge threshold -->
 			<param name="ebt_th_canny_h"      value="120"/> <!-- high canny edge threshold -->
+			<param name="ebt_th_valid_ratio"  value="0.50"/> <!-- valid sample points ratio -->
+			<param name="ebt_maxd"            value="32"/>  <!-- max search distance -->
+
+			<param name="user_input_"         value="false"/>
 
 			<param name="~viewer"       value="false"/> <!-- display results or not -->
 			<remap from="~image"        to="/camera/rgb/image_rect_color"/>
 			<remap from="~camera_info"  to="/camera/rgb/camera_info"/>
-			<remap from="~marker_array" to="object_tracking_2d_ros/marker_array"/>
+			<remap from="~marker_array" to="/object_tracking_2d_ros/marker_array"/>
+			<remap from="~detections"   to="/object_tracking_2d_ros/detections"/>
+			<remap from="~init_poses"   to="/object_tracking_2d_ros/init_poses"/>
+		</node>
+	</group>
+
+	<group ns="object3">
+		<node pkg="object_tracking_2d_ros" type="object_tracking_2d_ros_node" name="object_tracking_2d_ros" output="screen">
+			<!-- EBT TRACKER -->
+			<param name="ebt_tracker_type"    value="irls"/> <!-- name tracker (irls, pf, pf_textureless) -->
+			<param name="ebt_num_particle"    value="20"/> <!-- number of particles -->
+			<param name="ebt_min_keypoint"    value="15"/> <!-- min number of keypoint matches to start tracking -->
+			<param name="ebt_init"            value="true"/> <!-- initilize using surf or chamfer matching -->
+			<param name="ebt_th_cm"           value="0.001"/> <!-- threshold of chamfer matching -->
+			<param name="ebt_obj_path"        value="$(find object_tracking_2d_ros)data/crayola_64_ct/crayola_64_ct.obj"/> <!-- path of traget object -->
+			<param name="ebt_mesh_path"       value="package://object_tracking_2d_ros/data/crayola_64_ct/crayola_64_ct.dae"/> <!-- path of traget mesh -->
+			<rosparam param = "ebt_init_pose">[1,0,0,0,0,1,0,0,0,0,1,0.4,0,0,0,1]</rosparam>
+			<param name="ebt_dull_edge"       value="false"/> <!-- consider dull edges -->
+			<param name="ebt_sample_step"     value="0.005"/> <!-- sample step -->
+			<param name="ebt_intrinsic"       value="$(find object_tracking_2d_ros)/data/Intrinsics_normal.xml"/> <!-- intrinsics parameters -->
+			<param name="ebt_distortion"      value="$(find object_tracking_2d_ros)/data/Distortion_normal.xml"/> <!-- distortion parameters -->
+			<param name="ebt_display"         value="false"/> <!-- display results or not -->
+
+			<param name="ebt_th_canny_l"      value="100"/> <!-- low canny edge threshold -->
+			<param name="ebt_th_canny_h"      value="120"/> <!-- high canny edge threshold -->
+			<param name="ebt_th_valid_ratio"  value="0.50"/> <!-- valid sample points ratio -->
+			<param name="ebt_maxd"            value="32"/>  <!-- max search distance -->
+
+			<param name="user_input_"         value="false"/>
+
+			<param name="~viewer"       value="false"/> <!-- display results or not -->
+			<remap from="~image"        to="/camera/rgb/image_rect_color"/>
+			<remap from="~camera_info"  to="/camera/rgb/camera_info"/>
+			<remap from="~marker_array" to="/object_tracking_2d_ros/marker_array"/>
 			<remap from="~detections"   to="/object_tracking_2d_ros/detections"/>
 			<remap from="~init_poses"   to="/object_tracking_2d_ros/init_poses"/>
 		</node>

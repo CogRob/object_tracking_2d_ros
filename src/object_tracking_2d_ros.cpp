@@ -34,15 +34,15 @@ void ProcessUserActions()
         ebt_init_ = tracker_ ->init_;
         ROS_INFO("ObjectTrackin2D user input: RESET\n");
         break;
-//    case 'k':
-//        tracker_->saveKeyframe();
-//        ROS_INFO("ObjectTrackin2D user input: SAVE KEYFRAME\n");
-//        break;
-       case '1':
-        ebt_obj_id_ = '1';
+    case 'k':
+        tracker_->saveKeyframe();
+        ROS_INFO("ObjectTrackin2D user input: SAVE KEYFRAME\n");
         break;
-    default:
-        ebt_obj_id_ = '0';
+//       case '1':
+//        ebt_obj_id_ = '1';
+//        break;
+//    default:
+//        ebt_obj_id_ = '0';
     }
 }
 

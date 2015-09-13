@@ -1,7 +1,7 @@
 <launch>
 
 	<env name="ROSCONSOLE_CONFIG_FILE"
-	       value="$(find object_tracking_2d_ros)/cfg/custom_rosconsole.conf"/>
+		   value="$(find object_tracking_2d_ros)/cfg/custom_rosconsole.conf"/>
 
 	<node pkg="object_tracking_2d_ros" type="object_tracking_2d_ros_node" name="object_tracking_2d_ros" output="screen">
 		<!-- EBT TRACKER -->
@@ -10,9 +10,9 @@
 		<param name="ebt_min_keypoint"    value="15"/> <!-- min number of keypoint matches to start tracking -->
 		<param name="ebt_init"            value="true"/> <!-- initilize using surf or chamfer matching -->
 		<param name="ebt_th_cm"           value="0.001"/> <!-- threshold of chamfer matching -->
-		<param name="ebt_obj_path"        value="$(find object_tracking_2d_ros)/data/ronzoni1/ronzoni1.obj"/> <!-- path of traget object -->
-		<param name="ebt_mesh_path"       value="package://object_tracking_2d_ros/data/ronzoni1/ronzoni1.dae"/> <!-- path of traget mesh -->
-		<rosparam param = "ebt_init_pose">[1,0,0,0,0,1,0,0,0,0,1,0.4,0,0,0,1]</rosparam>
+		<param name="ebt_obj_path"        value="$(find object_tracking_2d_ros)data/crayola_64_ct/crayola_64_ct.obj"/> <!-- path of traget object -->
+		<param name="ebt_mesh_path"       value="package://object_tracking_2d_ros/data/crayola_64_ct/crayola_64_ct.dae"/> <!-- path of traget mesh -->
+		<rosparam param = "ebt_init_pose">[1,0,0,0,0,0,-1,0,0,1,0,0.4,0,0,0,1]</rosparam>
 		<param name="ebt_dull_edge"       value="false"/> <!-- consider dull edges -->
 		<param name="ebt_sample_step"     value="0.005"/> <!-- sample step -->
 		<param name="ebt_intrinsic"       value="$(find object_tracking_2d_ros)/data/Intrinsics_normal.xml"/> <!-- intrinsics parameters -->

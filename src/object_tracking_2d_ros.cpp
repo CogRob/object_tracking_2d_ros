@@ -28,10 +28,7 @@ void ProcessUserActions()
         ROS_INFO("ObjectTrackin2D user input: QUIT\n");
         break;
     case 'r':
-        tracker_->setPose(pose_init_);
-        tracker_->init_ = true;
-        tracker_->initialize();
-        ebt_init_ = tracker_ ->init_;
+        ebt_init_ = true;
         ROS_INFO("ObjectTrackin2D user input: RESET\n");
         break;
     case 'k':
@@ -102,17 +99,24 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
     ApplyTrackerSettingsCallback(tracker_);
     tracker_->setPose(pose_cv);
     ProcessUserActions();
+    tracker_->setImage(subscribed_gray);
+    if(ebt_reset_){
+        tracker_->init_ = false;
+        ROS_INFO("ObjectTrackin2D message input: RESET\n");
+        ebt_reset_ = false;
+    }
     if(ebt_init_){
         tracker_->init_ = true;
         tracker_->initialize();
+        ROS_INFO("ObjectTrackin2D message input: REINIT\n");
         ebt_init_ = tracker_->init_;
-        ROS_INFO("ObjectTrackin2D message input: RESET\n");
     }
-    tracker_->setImage(subscribed_gray);
-    tracker_->tracking();
 
     if(ebt_init_)
         return;
+
+    tracker_->tracking();
+
 
     pose_cv = tracker_->getPose();
     cov_cv = tracker_->getCovariance();
@@ -417,8 +421,8 @@ void InitPosesCallback(const object_tracking_2d_ros::ObjectDetections& msg)
                                      m.orientation.z);
                 pose_ = (t * r).matrix();
                 ROS_DEBUG_STREAM("Init Pose Set: "<<pose_);
+                ebt_reset_ = true;
             }
-
             ebt_init_ = msg.detections[i].init;
             ROS_DEBUG("Init SURF: %s", ebt_init_ ? "True" : "False");
         }

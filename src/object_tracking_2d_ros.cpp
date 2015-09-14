@@ -105,6 +105,9 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
         ROS_INFO("ObjectTrackin2D message input: RESET\n");
         ebt_reset_ = false;
     }
+    if(ebt_auto_init_){
+        ebt_init_ = tracker_->init_;
+    }
     if(ebt_init_){
         tracker_->init_ = true;
         tracker_->initialize();
@@ -330,6 +333,7 @@ void GetParameterValues()
     node_->param ("ebt_tracker_type", ebt_tracker_type_, std::string("irls"));
     node_->param ("ebt_num_particle", ebt_num_particle_, 1);
     node_->param ("ebt_min_keypoint", ebt_min_keypoint_, 20);
+    node_->param ("ebt_auto_init", ebt_auto_init_, true);
     node_->param ("ebt_init", ebt_init_, true);
     node_->param ("ebt_th_cm", ebt_th_cm_, 0.2);
     node_->param ("ebt_obj_path", ebt_obj_path_, std::string("obj_name"));

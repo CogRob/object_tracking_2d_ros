@@ -77,6 +77,7 @@ std::string ebt_mesh_resource_;
 int ebt_num_particle_;
 int ebt_min_keypoint_;
 bool ebt_init_;
+bool ebt_auto_init_;
 bool ebt_reset_;
 double ebt_th_cm_;
 std::string ebt_obj_path_;

@@ -150,6 +150,7 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
     // Store the detection into an array struture
     visualization_msgs::MarkerArray marker_transforms;
     object_tracking_2d_ros::ObjectDetections object_detections;
+    std::vector <tf::Transform> transforms;
     object_detections.header.frame_id = msg->header.frame_id;
     object_detections.header.stamp = msg->header.stamp;
 
@@ -209,6 +210,14 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
         object_det.pose.covariance = cov_;
         object_det.good = d.good;
 
+        // Set TF
+        tf::StampedTransform transform;
+        tf::poseMsgToTF(object_det.pose.pose, transform);
+        transform.stamp_ = object_det.header.stamp;
+        transform.frame_id_ = object_det.header.frame_id;
+        transform.child_frame_id_ = object_det.ns;
+        transforms.push_back(transform);
+
         // Add the detection to detection array message
         object_detections.detections.push_back(object_det);
     }
@@ -216,6 +225,11 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
     // Publish the marker and detection messages
     marker_publisher_.publish(marker_transforms);
     ebt_publisher_.publish(object_detections);
+
+    // Publish the marker and detection messages
+    if(publish_transform_){
+        transform_broadcaster_.sendTransform(transforms);
+    }
 
     // If viewing the tracking results
     if(viewer_ || viewing_)
@@ -353,6 +367,7 @@ void GetParameterValues()
     node_->param ("ebt_display", ebt_display_, false);
     node_->param ("user_input", user_input_, true);
     node_->param ("viewer", viewer_, false);
+    node_->param ("publish_transform", publish_transform_, true);
 
     boost::filesystem::path p(ebt_obj_path_);
     ebt_obj_id_ = p.filename().string();

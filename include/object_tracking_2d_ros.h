@@ -6,6 +6,7 @@
 #include <std_msgs/String.h>
 #include <image_transport/image_transport.h>
 #include <dynamic_reconfigure/server.h>
+#include <tf/transform_broadcaster.h>
 
 //Include Eigen tools for pose handeling
 #include <Eigen/Core>
@@ -57,7 +58,7 @@ ros::NodeHandlePtr node_;
 boost::shared_ptr<image_transport::ImageTransport> image_;
 sensor_msgs::CameraInfo camera_info_;
 
-// ROS Publishers and Subscribers
+// ROS Publishers, Subscribers and Broadcasters
 ros::Publisher marker_publisher_;
 ros::Publisher ebt_publisher_;
 ros::Publisher img_result_publisher_;
@@ -66,6 +67,7 @@ ros::Subscriber info_subscriber;
 ros::Subscriber init_poses_subscriber;
 ros::Subscriber sub_remote_key_;
 image_transport::Subscriber image_subscriber;
+static tf::TransformBroadcaster transform_broadcaster_;
 
 // Config
 object_tracking_2d_ros::object_tracking_2d_rosConfig config_;
@@ -100,6 +102,7 @@ int ebt_maxd_;
 Eigen::Matrix4d pose_;
 boost::array<double, 36> cov_;
 CvMat* pose_init_;
+bool publish_transform_;
 
 // Settings and local information
 bool viewer_;

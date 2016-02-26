@@ -67,7 +67,6 @@ ros::Subscriber info_subscriber;
 ros::Subscriber init_poses_subscriber;
 ros::Subscriber sub_remote_key_;
 image_transport::Subscriber image_subscriber;
-static tf::TransformBroadcaster transform_broadcaster_;
 
 // Config
 object_tracking_2d_ros::object_tracking_2d_rosConfig config_;

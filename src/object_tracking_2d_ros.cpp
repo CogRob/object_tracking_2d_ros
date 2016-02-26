@@ -150,7 +150,7 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
     // Store the detection into an array struture
     visualization_msgs::MarkerArray marker_transforms;
     object_tracking_2d_ros::ObjectDetections object_detections;
-    std::vector <tf::Transform> transforms;
+    std::vector <tf::StampedTransform> transforms;
     object_detections.header.frame_id = msg->header.frame_id;
     object_detections.header.stamp = msg->header.stamp;
 
@@ -228,6 +228,7 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
 
     // Publish the marker and detection messages
     if(publish_transform_){
+        static tf::TransformBroadcaster transform_broadcaster_;
         transform_broadcaster_.sendTransform(transforms);
     }
 

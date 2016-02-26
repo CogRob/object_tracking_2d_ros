@@ -7,6 +7,8 @@
 #include <image_transport/image_transport.h>
 #include <dynamic_reconfigure/server.h>
 #include <tf/transform_broadcaster.h>
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
 
 //Include Eigen tools for pose handeling
 #include <Eigen/Core>
@@ -45,6 +47,7 @@
 
 // Define the default topic names
 const std::string DEFAULT_IMAGE_TOPIC       = "image";
+const std::string DEFAULT_IMAGE_EDGES_TOPIC = "edges";
 const std::string DEFAULT_CAMERA_INFO_TOPIC = "camera_info";
 const std::string DEFAULT_MARKER_TOPIC      = "marker_array";
 const std::string DEFAULT_DETECTIONS_TOPIC  = "detections";

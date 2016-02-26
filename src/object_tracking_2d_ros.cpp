@@ -65,8 +65,12 @@ void ApplyTrackerSettingsCallback(TrackerBase* tracker)
     tracker->setMinKeypointMatches(ebt_min_keypoint_);
 }
 
-void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
+void ImageCallback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::ImageConstPtr& edges, const sensor_msgs::CameraInfoConstPtr& camera_info)
 {
+
+    camera_info_ = (*camera_info);
+    has_camera_info_ = true;
+
     // Dont atempt to use the image without having info about the camera first
     //    if(!has_camera_info_){
     //        ROS_WARN("No Camera Info Received Yet");
@@ -268,26 +272,26 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
 
 void ConnectCallback(const ros::SingleSubscriberPublisher& info)
 {
-    // Check for subscribers.
-    uint32_t subscribers = marker_publisher_.getNumSubscribers()
-            + ebt_publisher_.getNumSubscribers();
-    ROS_DEBUG("Subscription detected! (%d subscribers)", subscribers);
+//    // Check for subscribers.
+//    uint32_t subscribers = marker_publisher_.getNumSubscribers()
+//            + ebt_publisher_.getNumSubscribers();
+//    ROS_DEBUG("Subscription detected! (%d subscribers)", subscribers);
 
-    if(subscribers && !running_)
-    {
-        ROS_DEBUG("New Subscribers, Connecting to Input Image Topic.");
-        ros::TransportHints ros_transport_hints(ros::TransportHints().tcpNoDelay());
-        image_transport::TransportHints image_transport_hint(image_transport::TransportHints(
-                                                                 "raw", ros_transport_hints, (*node_),
-                                                                 "image_transport"));
+//    if(subscribers && !running_)
+//    {
+//        ROS_DEBUG("New Subscribers, Connecting to Input Image Topic.");
+//        ros::TransportHints ros_transport_hints(ros::TransportHints().tcpNoDelay());
+//        image_transport::TransportHints image_transport_hint(image_transport::TransportHints(
+//                                                                 "raw", ros_transport_hints, (*node_),
+//                                                                 "image_transport"));
 
-        image_subscriber = (*image_).subscribe(
-                    DEFAULT_IMAGE_TOPIC, 1, &ImageCallback,
-                    image_transport_hint);
-        info_subscriber = (*node_).subscribe(
-                    DEFAULT_CAMERA_INFO_TOPIC, 10, &InfoCallback);
-        running_ = true;
-    }
+//        image_subscriber = (*image_).subscribe(
+//                    DEFAULT_IMAGE_TOPIC, 1, &ImageCallback,
+//                    image_transport_hint);
+//        info_subscriber = (*node_).subscribe(
+//                    DEFAULT_CAMERA_INFO_TOPIC, 10, &InfoCallback);
+//        running_ = true;
+//    }
 }
 
 void DisconnectHandler()
@@ -296,18 +300,18 @@ void DisconnectHandler()
 
 void DisconnectCallback(const ros::SingleSubscriberPublisher& info)
 {
-    // Check for subscribers.
-    uint32_t subscribers = marker_publisher_.getNumSubscribers()
-            + ebt_publisher_.getNumSubscribers();
-    ROS_DEBUG("Unsubscription detected! (%d subscribers)", subscribers);
+//    // Check for subscribers.
+//    uint32_t subscribers = marker_publisher_.getNumSubscribers()
+//            + ebt_publisher_.getNumSubscribers();
+//    ROS_DEBUG("Unsubscription detected! (%d subscribers)", subscribers);
 
-    if(!subscribers && running_)
-    {
-        ROS_DEBUG("No Subscribers, Disconnecting from Input Image Topic.");
-        image_subscriber.shutdown();
-        info_subscriber.shutdown();
-        running_ = false;
-    }
+//    if(!subscribers && running_)
+//    {
+//        ROS_DEBUG("No Subscribers, Disconnecting from Input Image Topic.");
+//        image_subscriber.shutdown();
+//        info_subscriber.shutdown();
+//        running_ = false;
+//    }
 }
 
 void ViewerConnectCallback(const ros::SingleSubscriberPublisher& info)
@@ -512,6 +516,12 @@ void InitializeROSNode(int argc, char **argv)
     ros::init(argc, argv, "object_tracking_2d_ros");
     node_ =  boost::make_shared<ros::NodeHandle>("~");
     image_ = boost::make_shared<image_transport::ImageTransport>(*node_);
+
+    message_filters::Subscriber<sensor_msgs::Image> image_sub(*node_, DEFAULT_IMAGE_TOPIC, 1);
+    message_filters::Subscriber<sensor_msgs::Image> image_edges_sub(*node_, DEFAULT_IMAGE_EDGES_TOPIC, 1);
+    message_filters::Subscriber<sensor_msgs::CameraInfo> info_sub(*node_, DEFAULT_CAMERA_INFO_TOPIC, 1);
+    message_filters::TimeSynchronizer<sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::CameraInfo> sync(image_sub, image_edges_sub, info_sub, 10);
+    sync.registerCallback(boost::bind(&ImageCallback, _1, _2, _3));
 
 }
 

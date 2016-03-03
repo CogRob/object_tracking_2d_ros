@@ -6,6 +6,7 @@
 #include <std_msgs/String.h>
 #include <image_transport/image_transport.h>
 #include <dynamic_reconfigure/server.h>
+#include <tf/transform_broadcaster.h>
 
 //Include Eigen tools for pose handeling
 #include <Eigen/Core>
@@ -15,6 +16,7 @@
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 #include <cv_bridge/cv_bridge.h>
+#include <opencv2/opencv.hpp>
 
 //Include Visualization tools for mesh marker
 //#include <visualization_msgs/Marker.h>
@@ -41,10 +43,14 @@
 
 // Include user input tools
 #include "user_input_thread.h"
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+
 
 // Define the default topic names
 const std::string DEFAULT_IMAGE_TOPIC       = "image";
 const std::string DEFAULT_CAMERA_INFO_TOPIC = "camera_info";
+const std::string DEFAULT_IMAGE_EDGES_TOPIC = "edges";
 const std::string DEFAULT_MARKER_TOPIC      = "marker_array";
 const std::string DEFAULT_DETECTIONS_TOPIC  = "detections";
 const std::string DEFAULT_IMAGE_RESULT_TOPIC= "image_result";
@@ -99,6 +105,7 @@ int ebt_maxd_;
 Eigen::Matrix4d pose_;
 boost::array<double, 36> cov_;
 CvMat* pose_init_;
+bool publish_transform_;
 
 // Settings and local information
 bool viewer_;
@@ -110,6 +117,11 @@ bool quit_;
 std::string display_type_;
 std::string remote_input_;
 boost::shared_ptr<vk::UserInputThread> user_input_thread_;
+std::string edge_path;
+
+cv::Mat data_timestamp;
+
+int increment = 0;
 
 // Package Functions
 

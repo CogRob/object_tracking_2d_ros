@@ -18,10 +18,10 @@
 		<param name="ebt_min_keypoint"    value="10"/> <!-- min number of keypoint matches to start tracking -->
 		<param name="ebt_init"            value="true"/> <!-- initilize using surf or chamfer matching -->
 		<param name="ebt_th_cm"           value="0.001"/> <!-- threshold of chamfer matching -->
-		<param name="ebt_obj_path"        value="$(find object_tracking_2d_ros)data/ronzoni1/ronzoni1.obj"/> <!-- path of traget object -->
-		<param name="ebt_mesh_path"       value="package://object_tracking_2d_ros/data/ronzoni1/ronzoni1.dae"/> <!-- path of traget mesh -->
-		<rosparam param = "ebt_init_pose">[0.050050497,0.99873191,0.0054184478,0.036797043,0.18269837,-0.0038217753,-0.98316157,0.12686314,-0.9818942,0.050197512,-0.18265788,0.52354383,0,0,0,1]</rosparam>
-		<param name="ebt_dull_edge"       value="true"/> <!-- consider dull edges -->
+		<param name="ebt_obj_path"        value="$(find object_tracking_2d_ros)data/orange_juice_carton_flo/orange_juice_carton_flo.obj"/> <!-- path of traget object -->
+		<param name="ebt_mesh_path"       value="package://object_tracking_2d_ros/data/orange_juice_carton_flo/orange_juice_carton_flo.dae"/> <!-- path of traget mesh -->
+		<rosparam param = "ebt_init_pose">[1,0,0,0,0,1,0,0,0,0,1,0.4,0,0,0,1]</rosparam>
+		<param name="ebt_dull_edge"       value="false"/> <!-- consider dull edges -->
 		<param name="ebt_sample_step"     value="0.001"/> <!-- sample step -->
 		<param name="ebt_intrinsic"       value="$(find object_tracking_2d_ros)/data/Intrinsics_normal.xml"/> <!-- intrinsics parameters -->
 		<param name="ebt_distortion"      value="$(find object_tracking_2d_ros)/data/Distortion_normal.xml"/> <!-- distortion parameters -->
@@ -31,7 +31,7 @@
 		<param name="ebt_th_canny_h"      value="200"/> <!-- high canny edge threshold -->
 		<param name="ebt_th_valid_ratio"  value="0.5"/> <!-- valid sample points ratio -->
 		<param name="ebt_maxd"            value="32"/>  <!-- max search distance -->
-		<param name="edge_path"           value="/home/prateek/edge_images/output_ss_data/"/>  <!-- hed edge iamges -->
+		<param name="edge_path"           value="/home/prateek/edge_images/output_ojflo_data/"/>  <!-- hed edge iamges -->
 
 		<param name="user_input_"         value="true"/>
 
@@ -42,7 +42,6 @@
 		<remap from="~marker_array" to="/object_tracking_2d_ros/marker_array"/>
 		<remap from="~detections"   to="/object_tracking_2d_ros/detections"/>
 		<remap from="~init_poses"   to="/object_tracking_2d_ros/init_poses"/>
-      
 
 	</node>
 

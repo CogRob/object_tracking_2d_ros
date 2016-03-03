@@ -1,7 +1,12 @@
 //Include the base of object_tracking_2d_ros
 #include "object_tracking_2d_ros.h"
-
+#include <message_filters/sync_policies/approximate_time.h>
 using namespace std;
+
+//extern int increment = 0;
+
+//typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image,sensor_msgs::Image,sensor_msgs::CameraInfo> edimsyncpolicy;
+typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image,sensor_msgs::Image> MySyncPolicy;
 
 Eigen::Matrix4d GetDetectionTransform(ObjectDetection detection)
 {
@@ -38,8 +43,8 @@ void ProcessUserActions()
 //       case '1':
 //        ebt_obj_id_ = '1';
 //        break;
-//    default:
-//        ebt_obj_id_ = '0';
+    default:
+        ebt_obj_id_ = '0';
     }
 }
 
@@ -52,6 +57,7 @@ void InfoCallback(const sensor_msgs::CameraInfoConstPtr& camera_info)
 {
     camera_info_ = (*camera_info);
     has_camera_info_ = true;
+    std::cout<<"in callback"<<std::endl;
 }
 
 void ApplyTrackerSettingsCallback(TrackerBase* tracker)
@@ -65,7 +71,7 @@ void ApplyTrackerSettingsCallback(TrackerBase* tracker)
     tracker->setMinKeypointMatches(ebt_min_keypoint_);
 }
 
-void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
+void ImageCallback(const sensor_msgs::ImageConstPtr& msg,const sensor_msgs::ImageConstPtr& edges, const sensor_msgs::CameraInfoConstPtr& camera_info)//*/
 {
     // Dont atempt to use the image without having info about the camera first
     //    if(!has_camera_info_){
@@ -85,6 +91,28 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
         return;
     }
     cv::Mat subscribed_gray = subscribed_ptr->image;
+    //edges->step = 1920;
+  //  std::cout<<edges->height<<" "<<edges->width<<" "<<edges->encoding<<" "<<edges->step<<std::endl;
+
+
+
+    cv_bridge::CvImagePtr subscribed_ptr_edge;
+    try
+    {
+        subscribed_ptr_edge = cv_bridge::toCvCopy(edges);
+    }
+    catch(cv_bridge::Exception& e)
+    {
+        ROS_ERROR("cv_bridge exception: %s", e.what());
+        return;
+    }
+
+    //vimba_frame_ptr->GetImageSize(nSize);
+  //  std::cout<<"the image encoding is"<<subscribed_ptr_edge->encoding<<std::endl;
+    cv::Mat subscribed_edge = subscribed_ptr_edge->image;//*/
+
+
+
 
     // Convert pose matrix from Eigen to CvMat
     CvMat* pose_cv = cvCreateMat(4, 4, CV_32F);
@@ -95,13 +123,63 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
         }
     }
 
+    increment +=1;
+
+   // std::cout<<"The image number is "<<increment<<std::endl;
+
     // Apply the tracker to the image
     ApplyTrackerSettingsCallback(tracker_);
+
+
+
+   /* CvMLData mlData;
+    mlData.read_csv("/home/prateek/latestdata/bagfile-_camera_rgb_camera_info.csv");
+    const CvMat* tmp = mlData.get_values();
+  //  std::cout<<"in csv file"<<cv::Mat(tmp)<<std::endl;
+    cv::Mat tmp1 = cv::Mat(tmp);
+    data_timestamp.create(tmp1.rows,tmp1.cols,CV_64F);
+    data_timestamp = cv::Mat(tmp);
+  //  std::cout<<"in csv file"<<data_timestamp<<std::endl;
+
+
+   unsigned long long num = data_timestamp.at<>(10,2);
+
+    std::cout<<data_timestamp.rows<<" "<<num<<" "<<data_timestamp.channels()<<std::endl;
+
+
+
+
+    for(int i =0; i<data_timestamp.rows;i++)
+    {
+         //std::cout<<"data_timestam_[i][3]"<<double(data_timestamp.at<float>(i,2)/1e11)<<" "<<(msg->header.stamp).toSec()<<std::endl;
+        if((data_timestamp.at<float>(i,2)) == (msg->header.stamp).toNSec())
+        {
+            tracker_->setimagenum(i);
+            std::cout<<"image increment"<<i<<std::endl;
+            std::cout<<"data_timestam_[i][3]"<<data_timestamp.at<float>(i,2)<<" "<<(msg->header.stamp).toNSec()<<std::endl;
+
+        }
+
+
+
+    }*/
+
+   // cv::imshow("img",subscribed_edge);
+   // cv::waitKey(0);
+
+
+    std::cout<<cv::Mat(pose_cv)<<std::endl;
+    tracker_->setimagenum(increment+149);
     tracker_->setPose(pose_cv);
-    ProcessUserActions();
+    ProcessUserActions();    
     tracker_->setImage(subscribed_gray);
-    if(ebt_reset_){
-        tracker_->init_ = false;
+    tracker_->setedgeImage(subscribed_edge);//*/
+
+    if(ebt_reset_)
+    {
+       // tracker_->init_ = true;
+
+        tracker_->reinitialize();
         ROS_INFO("ObjectTrackin2D message input: RESET\n");
         ebt_reset_ = false;
     }
@@ -136,6 +214,8 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
     }
 
     // Store the detection into an array struture
+
+
     ObjectDetection d;
     d.pose = pose_;
     d.good = !tracker_->init_;
@@ -144,11 +224,16 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
     ObjectDetectionArray detections;
     detections.push_back(d);
 
+    ROS_DEBUG("tracker init is %d \n",d.good);
+
+
     // Store the detection into an array struture
     visualization_msgs::MarkerArray marker_transforms;
     object_tracking_2d_ros::ObjectDetections object_detections;
     object_detections.header.frame_id = msg->header.frame_id;
     object_detections.header.stamp = msg->header.stamp;
+    static tf::TransformBroadcaster transform_broadcaster_;
+    std::vector <tf::StampedTransform> transforms;
 
     // Loop over each detection
     for(unsigned int i = 0; i < detections.size(); ++i)
@@ -168,6 +253,7 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
         visualization_msgs::Marker marker_transform;
         marker_transform.header.frame_id = msg->header.frame_id;
         marker_transform.header.stamp = msg->header.stamp;
+
 //        stringstream convert;
 //        convert << "tag" << detections[i].id;
         marker_transform.id = detections[i].id;
@@ -206,21 +292,58 @@ void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
         object_det.pose.covariance = cov_;
         object_det.good = d.good;
 
+        tf::StampedTransform transform;
+        tf::poseMsgToTF(object_det.pose.pose, transform);
+        transform.stamp_ = object_det.header.stamp;
+        transform.frame_id_ = object_det.header.frame_id;
+        transform.child_frame_id_ = object_det.ns;
+        transforms.push_back(transform);
+
+
+
+
+
+
+
+
         // Add the detection to detection array message
         object_detections.detections.push_back(object_det);
+
+
+
+
     }
 
     // Publish the marker and detection messages
     marker_publisher_.publish(marker_transforms);
     ebt_publisher_.publish(object_detections);
 
+    if(publish_transform_)
+    {
+        transform_broadcaster_.sendTransform(transforms);
+        //transform_broadcaster_.send
+    }
+
+
+
     // If viewing the tracking results
     if(viewer_ || viewing_)
     {
         // Render the results and edges
+     /*   std::string name = "/home/prateek/results_ss/frame";
+        increment+= 1;
+        std::string result;
+        std::stringstream sstm;
+        sstm << name <<std::setw(4)<<std::setfill('0')<<increment<<".jpg";
+        result = sstm.str();*/
+
+
+
         tracker_->renderResults();
         cv::Mat img_result = tracker_->getResultImage();
         cv::Mat img_edge   = tracker_->getEdgeImage();
+
+       // cv::imwrite(result,img_result);
 
         // If using opencv viewer
         if(viewer_){
@@ -255,7 +378,7 @@ void ConnectCallback(const ros::SingleSubscriberPublisher& info)
             + ebt_publisher_.getNumSubscribers();
     ROS_DEBUG("Subscription detected! (%d subscribers)", subscribers);
 
-    if(subscribers && !running_)
+/*    if(subscribers && !running_)
     {
         ROS_DEBUG("New Subscribers, Connecting to Input Image Topic.");
         ros::TransportHints ros_transport_hints(ros::TransportHints().tcpNoDelay());
@@ -263,18 +386,34 @@ void ConnectCallback(const ros::SingleSubscriberPublisher& info)
                                                                  "raw", ros_transport_hints, (*node_),
                                                                  "image_transport"));
 
-        image_subscriber = (*image_).subscribe(
-                    DEFAULT_IMAGE_TOPIC, 1, &ImageCallback,
-                    image_transport_hint);
-        info_subscriber = (*node_).subscribe(
+      /*  message_filters::Subscriber<sensor_msgs::Image> image_sub(*node_, DEFAULT_IMAGE_TOPIC, 1);
+        message_filters::Subscriber<sensor_msgs::Image> image_edges_sub(*node_, DEFAULT_IMAGE_EDGES_TOPIC, 1);
+
+
+      /*  message_filters::Synchronizer<MySyncPolicy> sync(MySyncPolicy(10), image_sub, image_edges_sub);
+        sync.registerCallback(boost::bind(&ImageCallback, _1, _2));*/
+
+
+     //   message_filters::Subscriber<sensor_msgs::CameraInfo> info_sub(*node_, DEFAULT_CAMERA_INFO_TOPIC, 1);
+        //message_filters::Synchronizer<NoCloudSyncPolicy>* no_cloud_sync_;
+       // message_filters::TimeSynchronizer<sensor_msgs::Image, sensor_msgs::Image/*sensor_msgs::CameraInfo*/> sync(image_sub, image_edges_sub/*, info_sub*/, 10);
+       // sync.registerCallback(boost::bind(&ImageCallback, _1, _2/*, _3*/));*/
+
+
+
+  //      image_subscriber = (*image_).subscribe(
+   //                 DEFAULT_IMAGE_TOPIC, 1, &ImageCallback,
+    //                image_transport_hint);
+  /*      info_subscriber = (*node_).subscribe(
                     DEFAULT_CAMERA_INFO_TOPIC, 10, &InfoCallback);
         running_ = true;
-    }
+    }//*/
 }
 
 void DisconnectHandler()
 {
 }
+
 
 void DisconnectCallback(const ros::SingleSubscriberPublisher& info)
 {
@@ -283,13 +422,13 @@ void DisconnectCallback(const ros::SingleSubscriberPublisher& info)
             + ebt_publisher_.getNumSubscribers();
     ROS_DEBUG("Unsubscription detected! (%d subscribers)", subscribers);
 
-    if(!subscribers && running_)
+  /*  if(!subscribers && running_)
     {
         ROS_DEBUG("No Subscribers, Disconnecting from Input Image Topic.");
-        image_subscriber.shutdown();
+//        image_subscriber.shutdown();
         info_subscriber.shutdown();
         running_ = false;
-    }
+    }//*/
 }
 
 void ViewerConnectCallback(const ros::SingleSubscriberPublisher& info)
@@ -349,6 +488,9 @@ void GetParameterValues()
     node_->param ("ebt_display", ebt_display_, false);
     node_->param ("user_input", user_input_, true);
     node_->param ("viewer", viewer_, false);
+    node_->param ("edge_path",edge_path,std::string("val"));
+    node_->param ("publish_transform", publish_transform_, true);
+
 
     boost::filesystem::path p(ebt_obj_path_);
     ebt_obj_id_ = p.filename().string();
@@ -406,7 +548,7 @@ void SetupSubscriber()
 
 void InitPosesCallback(const object_tracking_2d_ros::ObjectDetections& msg)
 {
-    ROS_DEBUG("Init Poses Message of size %d Recived)", msg.detections.size());
+   // ROS_DEBUG("Init Poses Message of size %d Recived)", msg.detections.size());
     for(unsigned int i = 0; i < msg.detections.size(); ++i)
     {
         if(!ebt_obj_id_.compare(msg.detections[i].ns)){
@@ -466,6 +608,7 @@ void InitializeTracker()
 
     tracker_->setCannyHigh(ebt_th_canny_h_);
     tracker_->setCannyLow(ebt_th_canny_l_);
+    tracker_->setedgeimagepath(edge_path);
 
     std::string input = "ach";
     std::string ach_channel = "none";
@@ -485,6 +628,26 @@ void InitializeTracker()
 
     // Initialize the desired tracker
     tracker_->initTracker(ebt_obj_path_, input, ebt_intrinsic_, ebt_distortion_, ebt_width_, ebt_height_, pose_init_ , ach_channel);
+
+
+    //cvMahalanobis()
+   /* CvMLData mlData;
+    mlData.read_csv("/home/prateek/latestdata/bagfile-_camera_rgb_camera_info.csv");
+    const CvMat* tmp = mlData.get_values();
+  //  std::cout<<"in csv file"<<cv::Mat(tmp)<<std::endl;
+    cv::Mat tmp1 = cv::Mat(tmp);
+    data_timestamp.create(tmp1.rows,tmp1.cols,CV_32F);
+    data_timestamp = cv::Mat(tmp);
+    std::cout<<"in csv file"<<data_timestamp<<std::endl;*/
+
+
+
+
+
+
+
+
+
 }
 
 void InitializeROSNode(int argc, char **argv)
@@ -492,6 +655,17 @@ void InitializeROSNode(int argc, char **argv)
     ros::init(argc, argv, "object_tracking_2d_ros");
     node_ =  boost::make_shared<ros::NodeHandle>("~");
     image_ = boost::make_shared<image_transport::ImageTransport>(*node_);
+
+   /* message_filters::Subscriber<sensor_msgs::Image> image_sub(*node_, DEFAULT_IMAGE_TOPIC, 1);
+    message_filters::Subscriber<sensor_msgs::Image> image_edges_sub(*node_, DEFAULT_IMAGE_EDGES_TOPIC, 1);
+    message_filters::Subscriber<sensor_msgs::CameraInfo> info_sub(*node_, DEFAULT_CAMERA_INFO_TOPIC, 1);
+   // message_filters::Synchronizer<NoCloudSyncPolicy>* no_cloud_sync_;
+
+
+    message_filters::TimeSynchronizer<sensor_msgs::Image,sensor_msgs::Image, sensor_msgs::CameraInfo> sync(image_sub,image_edges_sub, info_sub, 10);
+    sync.registerCallback(boost::bind(&ImageCallback, _1, _2, _3));
+    //message_filters::TimeSynchronizer<sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::CameraInfo> sync(image_sub, image_edges_sub, info_sub, 10);
+    //sync.registerCallback(boost::bind(&ImageCallback, _1, _2, _3));*/
 
 }
 
@@ -503,6 +677,15 @@ int main(int argc, char **argv)
     SetupPublisher();
     SetupSubscriber();
     InitializeTracker();
+
+
+    message_filters::Subscriber<sensor_msgs::Image> image_sub(*node_, DEFAULT_IMAGE_TOPIC, 1);
+    message_filters::Subscriber<sensor_msgs::Image> image_edges_sub(*node_, DEFAULT_IMAGE_EDGES_TOPIC, 1);
+    message_filters::Subscriber<sensor_msgs::CameraInfo> info_sub(*node_, DEFAULT_CAMERA_INFO_TOPIC, 1);
+    //message_filters::Synchronizer<NoCloudSyncPolicy>* no_cloud_sync_;
+    message_filters::TimeSynchronizer<sensor_msgs::Image, sensor_msgs::Image,sensor_msgs::CameraInfo> sync(image_sub, image_edges_sub, info_sub, 10);
+    sync.registerCallback(boost::bind(&ImageCallback, _1, _2, _3));//*/
+
 
     if(viewer_){
         // Make a cv window for the viewer
